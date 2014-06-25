@@ -35,8 +35,11 @@ using namespace WhirlyKit;
     _lineScale = 1.0;
     _textScale = 1.0;
     _markerScale = 1.0;
+    _markerImportance = 2.0;
     _mapScaleScale = 1.0;
     _dashPatternScale = 1.0;
+    _useWideVectors = true;
+    _wideVecCuttoff = 0.0;
   
     return self;
 }
@@ -131,6 +134,13 @@ using namespace WhirlyKit;
         return nil;
     }
     
+    // Note: This is a terrible hack.  Change the regex string or fix the data.
+    {
+        NSMutableDictionary *attributes = (NSMutableDictionary *)vec.attributes;
+        if (attributes[@"NAME"] && !attributes[@"name"])
+            attributes[@"name"] = attributes[@"NAME"];
+    }
+
     @try {
         //Do variable substitution on [ ... ]
         NSMutableString *result;

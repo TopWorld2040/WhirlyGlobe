@@ -637,8 +637,8 @@ typedef enum {HighPerformance,LowPerformance} PerformanceMode;
                                                                                  kMaplyWideVecCoordType: kMaplyWideVecCoordTypeReal,
                                                                                  kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
                                                                                  kMaplyWideVecMiterLimit: @(1.01),
-                                                                                 // Repeat every 100m
-                                                                                 kMaplyWideVecTexRepeatLen: @(100/6371000.f),
+                                                                                 // Repeat every 10m
+                                                                                 kMaplyWideVecTexRepeatLen: @(10/6371000.f),
                                                                                  kMaplyMaxVis: @(0.00011049506429117173),
                                                                                  kMaplyMinVis: @(0.0)
                                                                                  }];
@@ -1203,8 +1203,8 @@ static const int NumMegaMarkers = 40000;
                  {
                      // Got the tile spec, parse out the basics
                      // Note: This should be a vector specific version
-                     MaplyRemoteTileInfo *tileInfo = [[MaplyRemoteTileInfo alloc] initWithTilespec:responseObject];
-                     if (!tileInfo)
+                     MaplyRemoteTileSource *tileSource = [[MaplyRemoteTileSource alloc] initWithTilespec:responseObject];
+                     if (!tileSource)
                      {
                          NSLog(@"Failed to parse tile info from: %@",jsonTileSpec);
                      } else {
@@ -1217,7 +1217,7 @@ static const int NumMegaMarkers = 40000;
                              [styleSet loadXmlFile:stylePath];
                              
                              // Now build the Mapnik vector tiles object
-                             MaplyMapnikVectorTiles *vecTiles = [[MaplyMapnikVectorTiles alloc] initWithTileSource:tileInfo];
+                             MaplyMapnikVectorTiles *vecTiles = [[MaplyMapnikVectorTiles alloc] initWithTileSource:tileSource];
                              vecTiles.styleDelegate = styleSet;
 
                              // Now for the paging layer itself

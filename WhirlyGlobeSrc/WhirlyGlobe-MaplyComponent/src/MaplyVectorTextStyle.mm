@@ -139,7 +139,7 @@ typedef enum {
         }
 
         [self resolveVisibility:styleEntry settings:settings desc:subStyle->desc];
-
+        
         if(styleEntry[@"value"])
             subStyle->textField = styleEntry[@"value"];
         else
@@ -225,6 +225,8 @@ typedef enum {
             }
         }
 
+        // Note: This should be MaplyThreadCurrent, but...
+        //   We need a GL context present for the text rendering
         MaplyComponentObject *compObj = [viewC addScreenLabels:labels desc:subStyle->desc mode:MaplyThreadAny];
         if (compObj)
             [compObjs addObject:compObj];
