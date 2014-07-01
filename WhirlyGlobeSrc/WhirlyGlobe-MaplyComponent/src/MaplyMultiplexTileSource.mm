@@ -225,7 +225,7 @@ typedef std::set<SortedTile> SortedTileSet;
 //    NSLog(@"Got tile: %d: (%d,%d), %d",tileID.level,tileID.x,tileID.y,which);
     
     // Look for it in the bit list
-    bool done = true;
+    bool done = false;
     Maply::SortedTile theTile(tileID);
     int singleFetch = false;
     @synchronized(self)
@@ -244,21 +244,24 @@ typedef std::set<SortedTile> SortedTileSet;
             done = true;
         }
 
+        // Add the tile data in and see if we're done
+        theTile.tileData[which] = (tileData ? tileData : [NSNull null]);
+
         if (!done)
-        {
-            // Add the tile data in and see if we're done
-            theTile.tileData[which] = (tileData ? tileData : [NSNull null]);
+        {//check if done
+            done = true;
             for (unsigned int ii=0;ii<theTile.tileData.size();ii++)
+            {
                 if (theTile.tileData[ii] == nil)
                 {
                     done = false;
                     break;
                 }
-        }
-
-        // If we're not, put the tile back in the set
-        if (!done)
+            }
+          // If we're not, put the tile back in the set
+          if (!done)
             sortedTiles.insert(theTile);
+        }
     }
     
     // Let's write it back out for the cache
@@ -278,8 +281,13 @@ typedef std::set<SortedTile> SortedTileSet;
         // Let the paging layer know about it
         NSMutableArray *allData = [NSMutableArray array];
         for (unsigned int ii=0;ii<theTile.tileData.size();ii++)
-            [allData addObject:theTile.tileData[ii]];
- 
+        {
+            if(theTile.tileData[ii])
+                [allData addObject:theTile.tileData[ii]];
+            else
+                NSLog(@"Data missing");
+        }
+      
         NSError *marshalError = [self marshalDataArray:allData];
         if (!marshalError)
         {
