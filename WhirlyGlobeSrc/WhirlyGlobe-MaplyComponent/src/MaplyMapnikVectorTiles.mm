@@ -46,6 +46,7 @@ using namespace WhirlyGlobe;
 
 @interface MaplyMapnikVectorTiles ()
 @property (nonatomic, strong, readwrite) NSArray *tileSources;
+@property (nonatomic, strong) NSOperationQueue *queue;
 
 @end
 
@@ -181,6 +182,8 @@ static double MAX_EXTENT = 20037508.342789244;
   self = [super init];
   if(self) {
     self.tileSources = tileSources;
+    self.queue = [[NSOperationQueue alloc] init];
+    self.queue.maxConcurrentOperationCount = 4;
   }
   return self;
 }
@@ -202,7 +205,7 @@ static double MAX_EXTENT = 20037508.342789244;
 #ifdef DEBUG_TIMING
   NSLog(@"%@ startFetchForTile: %d/%d/%d", NSStringFromClass([self class]), tileID.level,tileID.x,tileID.y);
 #endif
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+  [self.queue addOperationWithBlock:^{
 #ifdef DEBUG_TIMING
     CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
     CFTimeInterval fetchTime = 0;
@@ -567,7 +570,7 @@ static double MAX_EXTENT = 20037508.342789244;
           tileID.level, tileID.x, tileID.y,
           duration, fetchTime, duration - fetchTime);
 #endif
-  });
+  }];
 }
 
 
