@@ -195,10 +195,18 @@ static double MAX_EXTENT = 20037508.342789244;
     return self;
 }
 
+//#define DEBUG_TIMING 1
+
 #pragma mark - MaplyPagingDelegate
 - (void)startFetchForTile:(MaplyTileID)tileID forLayer:(MaplyQuadPagingLayer *)layer {
-  //NSLog(@"%@ startFetchForTile: %d/%d/%d", NSStringFromClass([self class]), tileID.level,tileID.x,tileID.y);
+#ifdef DEBUG_TIMING
+  NSLog(@"%@ startFetchForTile: %d/%d/%d", NSStringFromClass([self class]), tileID.level,tileID.x,tileID.y);
+#endif
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+#ifdef DEBUG_TIMING
+    CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
+    CFTimeInterval fetchTime = 0;
+#endif
     //calulate tile bounds and coordinate shift
     int tileSize = 256;
     MaplyCoordinate ll;
@@ -230,7 +238,6 @@ static double MAX_EXTENT = 20037508.342789244;
     Point2f firstCoord;
 
     NSMutableArray *components = [NSMutableArray array];
-//    CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
 
     unsigned featureCount = 0;
     
@@ -250,7 +257,14 @@ static double MAX_EXTENT = 20037508.342789244;
       } else {
         flippedYTile = tileID;
       }
+      
+#ifdef DEBUG_TIMING
+      CFAbsoluteTime fetchStart = CFAbsoluteTimeGetCurrent();
+#endif
       tileData = [tileSource imageForTile:flippedYTile];
+#ifdef DEBUG_TIMING
+      fetchTime += CFAbsoluteTimeGetCurrent() - fetchStart;
+#endif
       
       if(tileData.length) {
         if([tileData isCompressed]) {
@@ -546,12 +560,13 @@ static double MAX_EXTENT = 20037508.342789244;
     [layer addData:components forTile:tileID style:MaplyDataStyleReplace];
     [layer tileDidLoad:tileID];
 
-      // Note: Turn this back on for debugging
-//    CFTimeInterval duration = CFAbsoluteTimeGetCurrent() - start;
-//    NSLog(@"Added %lu components for %d features for tile %d/%d/%d in %f seconds",
-//          (unsigned long)components.count, featureCount,
-//          tileID.level, tileID.x, tileID.y,
-//          duration);
+#ifdef DEBUG_TIMING
+    CFTimeInterval duration = CFAbsoluteTimeGetCurrent() - start;
+    NSLog(@"Added %lu components for %d features for tile %d/%d/%d in %f seconds, %f fetching, %f parsing",
+          (unsigned long)components.count, featureCount,
+          tileID.level, tileID.x, tileID.y,
+          duration, fetchTime, duration - fetchTime);
+#endif
   });
 }
 
