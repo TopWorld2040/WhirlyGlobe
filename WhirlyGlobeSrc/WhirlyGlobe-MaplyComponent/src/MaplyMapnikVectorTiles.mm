@@ -79,6 +79,8 @@ static double MAX_EXTENT = 20037508.342789244;
         vecTiles.styleDelegate = styleSet;
 
         successBlock(vecTiles);
+        
+        [styleSet generateStyles];
     };
     
     // This block fetches the json tile spec after the style data has been read
@@ -128,7 +130,7 @@ static double MAX_EXTENT = 20037508.342789244;
     }
 }
 
-+ (void) StartRemoteVectorTilesWithURL:(NSString *)tileURL minZoom:(int)minZoom maxZoom:(int)maxZoom style:(NSString *)styleURL cacheDir:(NSString *)cacheDir viewC:(MaplyBaseViewController *)viewC success:(void (^)(MaplyMapnikVectorTiles *vecTiles))successBlock failure:(void (^)(NSError *error))failureBlock;
++ (void) StartRemoteVectorTilesWithURL:(NSString *)tileURL ext:(NSString *)ext minZoom:(int)minZoom maxZoom:(int)maxZoom style:(NSString *)styleURL cacheDir:(NSString *)cacheDir viewC:(MaplyBaseViewController *)viewC success:(void (^)(MaplyMapnikVectorTiles *vecTiles))successBlock failure:(void (^)(NSError *error))failureBlock;
 {
     // We'll invoke this block when we've fetched the tilespec and the style file
     void (^startBlock)(NSData *styleData) =
@@ -136,7 +138,7 @@ static double MAX_EXTENT = 20037508.342789244;
     {
         // Got the tile spec, parse out the basics
         // Note: This should be a vector specific version
-        MaplyRemoteTileInfo *tileInfo = [[MaplyRemoteTileInfo alloc] initWithBaseURL:tileURL ext:@"" minZoom:minZoom maxZoom:maxZoom];
+        MaplyRemoteTileInfo *tileInfo = [[MaplyRemoteTileInfo alloc] initWithBaseURL:tileURL ext:ext minZoom:minZoom maxZoom:maxZoom];
         MaplyRemoteTileSource *tileSource = [[MaplyRemoteTileSource alloc] initWithInfo:tileInfo];
         tileSource.cacheDir = cacheDir;
         if (!tileSource)
@@ -148,12 +150,17 @@ static double MAX_EXTENT = 20037508.342789244;
         // Now for the styles
         // This deals with the Mapnik styles themselves
         MapnikStyleSet *styleSet = [[MapnikStyleSet alloc] initForViewC:viewC];
-        [styleSet loadXmlData:styleData];
+        if ([styleURL rangeOfString:@".xml"].location == NSNotFound)
+            [styleSet loadJsonData:styleData];
+        else
+            [styleSet loadXmlData:styleData];
         
         MaplyMapnikVectorTiles *vecTiles = [[MaplyMapnikVectorTiles alloc] initWithTileSource:tileSource];
         vecTiles.styleDelegate = styleSet;
         
         successBlock(vecTiles);
+        
+        [styleSet generateStyles];
     };
     
     // Fetch the style file
@@ -506,11 +513,11 @@ static double MAX_EXTENT = 20037508.342789244;
             } //end of iterating features
           }//end of itterating layers
         } else {
-          NSLog(@"Failed to parse pbf %d/%d/%d", tileID.level, tileID.x, tileID.y);
+          NSLog(@"Failed to parse pbf %d/%d/%d", flippedYTile.level, flippedYTile.x, flippedYTile.y);
         }
         tileData = nil;
       } else {
-        NSLog(@"No data for tile %d/%d/%d", tileID.level, tileID.x, tileID.y);
+        NSLog(@"No data for tile %d/%d/%d", flippedYTile.level, flippedYTile.x, flippedYTile.y);
       }
     }//end of iterating tile sources
     
