@@ -29,7 +29,7 @@
     touchDelegate.gestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:touchDelegate
                                                                                     action:@selector(touchGesture:)];
 
-    ((UILongPressGestureRecognizer*)touchDelegate.gestureRecognizer).minimumPressDuration = 0.01;
+    ((UILongPressGestureRecognizer*)touchDelegate.gestureRecognizer).minimumPressDuration = 0.0;
     touchDelegate.gestureRecognizer.delegate = touchDelegate;
     [view addGestureRecognizer:touchDelegate.gestureRecognizer];
     return touchDelegate;
