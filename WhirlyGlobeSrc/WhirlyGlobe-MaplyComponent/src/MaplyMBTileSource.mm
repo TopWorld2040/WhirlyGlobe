@@ -62,7 +62,7 @@ using namespace WhirlyKit;
     }
     
     // Open the sqlite DB
-    if (sqlite3_open([infoPath cStringUsingEncoding:NSASCIIStringEncoding],&_sqlDb) != SQLITE_OK)
+    if (sqlite3_open_v2([infoPath cStringUsingEncoding:NSASCIIStringEncoding],&_sqlDb, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK)
     {
         return nil;
     }
