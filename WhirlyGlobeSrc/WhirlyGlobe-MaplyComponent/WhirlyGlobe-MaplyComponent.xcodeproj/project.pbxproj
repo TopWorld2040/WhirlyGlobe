@@ -17,7 +17,6 @@
 		2B0B0D1415C1D88600CCB3B2 /* MaplyViewTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B0D1215C1D88600CCB3B2 /* MaplyViewTracker.m */; };
 		2B0D62D017A1D9AC00C3298D /* MaplyWMSTileSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B0D62CF17A1D9AC00C3298D /* MaplyWMSTileSource.h */; };
 		2B0D62D317A1D9BB00C3298D /* MaplyWMSTileSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2B0D62D217A1D9BB00C3298D /* MaplyWMSTileSource.mm */; };
-		2B0D62ED17A2ECCA00C3298D /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B0D62EC17A2ECCA00C3298D /* libxml2.dylib */; };
 		2B0D630117A2EDA300C3298D /* DDXMLElementAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B0D62F317A2EDA300C3298D /* DDXMLElementAdditions.h */; };
 		2B0D630217A2EDA300C3298D /* DDXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B0D62F417A2EDA300C3298D /* DDXMLElementAdditions.m */; };
 		2B0D630317A2EDA300C3298D /* NSString+DDXML.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B0D62F617A2EDA300C3298D /* NSString+DDXML.h */; };
@@ -44,7 +43,6 @@
 		2B44E81E174B20F500474C2B /* MaplyQuadPagingLayer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B44E81D174B20F500474C2B /* MaplyQuadPagingLayer_private.h */; };
 		2B4AFB8C18031C1F00C3F948 /* MaplyQuadImageOfflineLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4AFB8B18031C1F00C3F948 /* MaplyQuadImageOfflineLayer.h */; };
 		2B4AFB8F18031C2B00C3F948 /* MaplyQuadImageOfflineLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2B4AFB8E18031C2B00C3F948 /* MaplyQuadImageOfflineLayer.mm */; };
-		2B604125179901B0008BA2F6 /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B604124179901B0008BA2F6 /* libstdc++.dylib */; };
 		2B61D78A1603F5CE007888CF /* libWhirlyGlobeLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B11E0F315B4C0BA007AAE3F /* libWhirlyGlobeLib.a */; };
 		2B61D7AE16078A3B007888CF /* MaplyComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B61D7AC16078A3B007888CF /* MaplyComponent.h */; };
 		2B61D7AF16078A3B007888CF /* MaplyViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B61D7AD16078A3B007888CF /* MaplyViewController.h */; };
@@ -567,8 +565,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B0D62ED17A2ECCA00C3298D /* libxml2.dylib in Frameworks */,
-				2B604125179901B0008BA2F6 /* libstdc++.dylib in Frameworks */,
 				2B61D78A1603F5CE007888CF /* libWhirlyGlobeLib.a in Frameworks */,
 				2B11E0DF15B4C030007AAE3F /* Foundation.framework in Frameworks */,
 			);
