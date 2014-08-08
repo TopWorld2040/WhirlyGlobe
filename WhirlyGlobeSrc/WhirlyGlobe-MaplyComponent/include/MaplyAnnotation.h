@@ -63,8 +63,7 @@
 
 
 /// @brief geolocation of the annotation
-#warning - should this be read-only in the public interface?
-@property (nonatomic) MaplyCoordinate loc;
+@property (nonatomic, readonly) MaplyCoordinate loc;
 
 
 @end
