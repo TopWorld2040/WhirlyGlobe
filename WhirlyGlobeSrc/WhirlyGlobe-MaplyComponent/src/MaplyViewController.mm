@@ -795,19 +795,29 @@ using namespace Maply;
     {
         float midHeight = (minHeight + maxHeight)/2.0;
         bool midOnScreen = [self checkCoverage:mbr mapView:mapView height:midHeight];
-        
-        if (!minOnScreen && midOnScreen)
+
+        if(midOnScreen)
         {
-            maxHeight = midHeight;
-            maxOnScreen = YES;
-        } else if (!midOnScreen && maxOnScreen) {
-            minHeight = midHeight;
-            minOnScreen = NO;
+            if(maxOnScreen)
+            {
+                maxHeight = midHeight;
+                maxOnScreen = YES;
+            } else
+            {
+                minHeight = midHeight;
+                minOnScreen = YES;
+            }
         } else {
-            // Not expecting this
-            break;
+            if(maxOnScreen)
+            {
+                minHeight = midHeight;
+                minOnScreen = NO;
+            } else
+            {
+                maxHeight = midHeight;
+                maxOnScreen = NO;
+            }
         }
-        
     } while (maxHeight-minHeight > minRange);
     
     //set map back to pre-search state
