@@ -189,8 +189,10 @@ using namespace WhirlyKit;
     
     [self loadSetup_glView];
 
-	// Set up the OpenGL ES renderer
-    sceneRenderer = [[WhirlyKitSceneRendererES3 alloc] init];
+  	// Set up the OpenGL ES renderer
+    if([[UIDevice currentDevice].systemVersion doubleValue] >= 7.0) {
+        sceneRenderer = [[WhirlyKitSceneRendererES3 alloc] init];
+    }
     if (!sceneRenderer)
         sceneRenderer = [[WhirlyKitSceneRendererES2 alloc] init];
     sceneRenderer.zBufferMode = zBufferOffDefault;
