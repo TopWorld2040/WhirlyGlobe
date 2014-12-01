@@ -110,6 +110,10 @@ using namespace WhirlyKit;
         sqlhelpers::StatementRead readStmt3(_sqlDb,@"select min(zoom_level) from tiles;");
         if (readStmt3.stepRow())
             _minZoom = [readStmt3.getString() intValue];
+        else { //if this statement fails, something is very wrong
+            sqlite3_close(_sqlDb);
+            return nil;
+        }
     }
     sqlhelpers::StatementRead readStmt3(_sqlDb,@"select value from metadata where name='maxzoom';");
     if (readStmt3.stepRow())
@@ -119,6 +123,10 @@ using namespace WhirlyKit;
         sqlhelpers::StatementRead readStmt3(_sqlDb,@"select max(zoom_level) from tiles;");
         if (readStmt3.stepRow())
             _maxZoom = [readStmt3.getString() intValue];
+        else { //if this statement fails, something is very wrong
+            sqlite3_close(_sqlDb);
+            return nil;
+        }
     }
     
     // Note: We could load something and calculate this, but I don't want to slow us down here
