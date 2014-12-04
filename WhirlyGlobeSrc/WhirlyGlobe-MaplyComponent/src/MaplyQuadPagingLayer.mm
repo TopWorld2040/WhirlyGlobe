@@ -85,9 +85,13 @@ public:
                 [addCompObjs addObjectsFromArray:newObjs];
                 break;
             case MaplyDataStyleReplace:
-                if (!replaceCompObjs)
-                    replaceCompObjs = [NSMutableArray array];
-                [replaceCompObjs addObjectsFromArray:newObjs];
+                if (!replaceCompObjs) {
+                    replaceCompObjs = [NSMutableArray arrayWithArray:newObjs];
+                } else {
+                    NSMutableArray *newReplaceCompObjs = [NSMutableArray arrayWithArray:replaceCompObjs];
+                    [newReplaceCompObjs addObjectsFromArray:newObjs];
+                    replaceCompObjs = newReplaceCompObjs;
+                }
                 break;
         }
     }
