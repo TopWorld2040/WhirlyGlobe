@@ -1002,4 +1002,8 @@ using namespace Maply;
 
 
 
+- (BOOL)isAnimating {
+    return mapView.delegate != nil;
+}
+
 @end

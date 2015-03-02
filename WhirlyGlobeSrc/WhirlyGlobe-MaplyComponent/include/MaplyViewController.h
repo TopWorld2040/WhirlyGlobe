@@ -279,4 +279,9 @@
  */
 - (MaplyBoundingBox) getCurrentExtents;
 
+/**
+ @brief Check if an animation is currently in progress
+ */
+- (BOOL)isAnimating;
+
 @end
