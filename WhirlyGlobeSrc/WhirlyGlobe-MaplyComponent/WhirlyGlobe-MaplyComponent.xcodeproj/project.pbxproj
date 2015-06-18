@@ -264,16 +264,11 @@
 		8894575018F20D4200FE60E7 /* MapnikStyleSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 8894574B18F20D4200FE60E7 /* MapnikStyleSet.h */; };
 		8894575118F20D4200FE60E7 /* vector_tile.pb.h in Headers */ = {isa = PBXBuildFile; fileRef = 8894574C18F20D4200FE60E7 /* vector_tile.pb.h */; };
 		88AF302C198678F700EC91C5 /* FMDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = 88AF3021198678F700EC91C5 /* FMDatabase.h */; };
-		88AF302D198678F700EC91C5 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 88AF3022198678F700EC91C5 /* FMDatabase.m */; };
 		88AF302E198678F700EC91C5 /* FMDatabaseAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 88AF3023198678F700EC91C5 /* FMDatabaseAdditions.h */; };
-		88AF302F198678F700EC91C5 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 88AF3024198678F700EC91C5 /* FMDatabaseAdditions.m */; };
 		88AF3030198678F700EC91C5 /* FMDatabasePool.h in Headers */ = {isa = PBXBuildFile; fileRef = 88AF3025198678F700EC91C5 /* FMDatabasePool.h */; };
-		88AF3031198678F700EC91C5 /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = 88AF3026198678F700EC91C5 /* FMDatabasePool.m */; };
 		88AF3032198678F700EC91C5 /* FMDatabaseQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 88AF3027198678F700EC91C5 /* FMDatabaseQueue.h */; };
-		88AF3033198678F700EC91C5 /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 88AF3028198678F700EC91C5 /* FMDatabaseQueue.m */; };
 		88AF3034198678F700EC91C5 /* FMDB.h in Headers */ = {isa = PBXBuildFile; fileRef = 88AF3029198678F700EC91C5 /* FMDB.h */; };
 		88AF3035198678F700EC91C5 /* FMResultSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 88AF302A198678F700EC91C5 /* FMResultSet.h */; };
-		88AF3036198678F700EC91C5 /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 88AF302B198678F700EC91C5 /* FMResultSet.m */; };
 		C765E3B4190ACA2900931775 /* NSDictionary+StyleRules.h in Headers */ = {isa = PBXBuildFile; fileRef = C765E3B3190ACA2900931775 /* NSDictionary+StyleRules.h */; };
 /* End PBXBuildFile section */
 
@@ -1344,12 +1339,10 @@
 				2BBAA90A181EEE3F00BE1277 /* MaplyBillboard.mm in Sources */,
 				8894574318F20D2800FE60E7 /* MaplyMapnikVectorTiles.mm in Sources */,
 				881F669C18F20A8F00D17110 /* tokenizer.cc in Sources */,
-				88AF3031198678F700EC91C5 /* FMDatabasePool.m in Sources */,
 				2B4AFB8F18031C2B00C3F948 /* MaplyQuadImageOfflineLayer.mm in Sources */,
 				2B897A8F15BC6C7B00250F23 /* PanDelegateFixed.mm in Sources */,
 				2B96D36218A9AC2600999E24 /* MaplyVectorPolygonStyle.mm in Sources */,
 				2B897A9115BC6CEE00250F23 /* MaplyViewControllerLayer.mm in Sources */,
-				88AF302F198678F700EC91C5 /* FMDatabaseAdditions.m in Sources */,
 				2B897A9315BC6E9400250F23 /* WGSphericalEarthWithTexGroup.mm in Sources */,
 				881F669218F20A8F00D17110 /* generated_message_util.cc in Sources */,
 				2BB9E01F15BF9EF200F1DDD8 /* MaplyLabel.m in Sources */,
@@ -1379,11 +1372,9 @@
 				2B61D7C51607ACC3007888CF /* WGViewControllerLayer.mm in Sources */,
 				2BDC8A22191D994F00DFECF0 /* AFURLConnectionOperation.m in Sources */,
 				881F66A418F20A8F00D17110 /* message.cc in Sources */,
-				88AF3036198678F700EC91C5 /* FMResultSet.m in Sources */,
 				2BE8848C160A46C700E92A0A /* MaplyInteractionLayer.mm in Sources */,
 				2B96D36018A9AC2600999E24 /* MaplyVectorLineStyle.mm in Sources */,
 				881F668C18F20A8F00D17110 /* extension_set.cc in Sources */,
-				88AF302D198678F700EC91C5 /* FMDatabase.m in Sources */,
 				881F669E18F20A8F00D17110 /* zero_copy_stream.cc in Sources */,
 				8894574418F20D2800FE60E7 /* MapnikStyle.m in Sources */,
 				881F66A018F20A8F00D17110 /* zero_copy_stream_impl.cc in Sources */,
@@ -1411,7 +1402,6 @@
 				2B96D36818AAE82700999E24 /* MaplyVectorStyle.mm in Sources */,
 				2B0D630217A2EDA300C3298D /* DDXMLElementAdditions.m in Sources */,
 				2B0D630417A2EDA300C3298D /* NSString+DDXML.m in Sources */,
-				88AF3033198678F700EC91C5 /* FMDatabaseQueue.m in Sources */,
 				881F669A18F20A8F00D17110 /* printer.cc in Sources */,
 				8894574618F20D2800FE60E7 /* MapnikStyleSet.m in Sources */,
 				2BDC8A17191D994F00DFECF0 /* AFHTTPRequestOperation.m in Sources */,
