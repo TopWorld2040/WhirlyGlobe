@@ -35,16 +35,11 @@
 		2B11E0DF15B4C030007AAE3F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B11E0DE15B4C030007AAE3F /* Foundation.framework */; };
 		2B14802F1B5453690071D727 /* MaplyShape_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B14802E1B5453690071D727 /* MaplyShape_private.h */; };
 		2B1B31FC1B0A6FDD00A37285 /* FMDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B1B31F11B0A6FDD00A37285 /* FMDatabase.h */; };
-		2B1B31FD1B0A6FDD00A37285 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B1B31F21B0A6FDD00A37285 /* FMDatabase.m */; };
 		2B1B31FE1B0A6FDD00A37285 /* FMDatabaseAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B1B31F31B0A6FDD00A37285 /* FMDatabaseAdditions.h */; };
-		2B1B31FF1B0A6FDD00A37285 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B1B31F41B0A6FDD00A37285 /* FMDatabaseAdditions.m */; };
 		2B1B32001B0A6FDD00A37285 /* FMDatabasePool.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B1B31F51B0A6FDD00A37285 /* FMDatabasePool.h */; };
-		2B1B32011B0A6FDD00A37285 /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B1B31F61B0A6FDD00A37285 /* FMDatabasePool.m */; };
 		2B1B32021B0A6FDD00A37285 /* FMDatabaseQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B1B31F71B0A6FDD00A37285 /* FMDatabaseQueue.h */; };
-		2B1B32031B0A6FDD00A37285 /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B1B31F81B0A6FDD00A37285 /* FMDatabaseQueue.m */; };
 		2B1B32041B0A6FDD00A37285 /* FMDB.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B1B31F91B0A6FDD00A37285 /* FMDB.h */; };
 		2B1B32051B0A6FDD00A37285 /* FMResultSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B1B31FA1B0A6FDD00A37285 /* FMResultSet.h */; };
-		2B1B32061B0A6FDD00A37285 /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B1B31FB1B0A6FDD00A37285 /* FMResultSet.m */; };
 		2B2E2FF816C4885800CAD143 /* MaplyShader.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B2E2FF616C4885800CAD143 /* MaplyShader.h */; };
 		2B2E2FFC16C4886800CAD143 /* MaplyShader.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2B2E2FFB16C4886800CAD143 /* MaplyShader.mm */; };
 		2B2FEBB41B571DAA00A332BF /* MaplyBlankTileSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B2FEBB31B571DAA00A332BF /* MaplyBlankTileSource.h */; };
@@ -1963,7 +1958,6 @@
 				2B2FEC9C1B572BD400A332BF /* AAPlanetaryPhenomena.cpp in Sources */,
 				2BD5A8691B41FEEB00DDAEE3 /* MapboxVectorStyleSet.mm in Sources */,
 				2B897A8515BB5DEB00250F23 /* WhirlyGlobeViewController.mm in Sources */,
-				2B1B31FD1B0A6FDD00A37285 /* FMDatabase.m in Sources */,
 				2B897A8715BBB83E00250F23 /* WGInteractionLayer.mm in Sources */,
 				2BDC8A1B191D994F00DFECF0 /* AFHTTPSessionManager.m in Sources */,
 				2BD5A8621B41FECF00DDAEE3 /* common.cc in Sources */,
@@ -2085,11 +2079,9 @@
 				2BB0717D1676B5BD00DE387D /* MaplySticker.mm in Sources */,
 				2B0A4DB8167BDAD3000D5786 /* MaplyBaseInteractionLayer.mm in Sources */,
 				2B2FEC8E1B572BD400A332BF /* AAMoonPerigeeApogee.cpp in Sources */,
-				2B1B32061B0A6FDD00A37285 /* FMResultSet.m in Sources */,
 				2B2FEC771B572BD400A332BF /* AADynamicalTime.cpp in Sources */,
 				2B0A4DB9167BDAD3000D5786 /* MaplyBaseViewController.mm in Sources */,
 				2B37059E16B1E6110096C970 /* MaplySphericalQuadEarthWithTexGroup.mm in Sources */,
-				2B1B31FF1B0A6FDD00A37285 /* FMDatabaseAdditions.m in Sources */,
 				2BB7FB5316B9AD0D0017EB2F /* MaplyLight.m in Sources */,
 				2B2E2FFC16C4886800CAD143 /* MaplyShader.mm in Sources */,
 				2BD5A8601B41FECF00DDAEE3 /* atomicops_internals_x86_gcc.cc in Sources */,
@@ -2119,7 +2111,6 @@
 				2BD5A8661B41FECF00DDAEE3 /* strutil.cc in Sources */,
 				2BDC8A17191D994F00DFECF0 /* AFHTTPRequestOperation.m in Sources */,
 				2B789F76185B8C950028E027 /* SMCalloutView.m in Sources */,
-				2B1B32011B0A6FDD00A37285 /* FMDatabasePool.m in Sources */,
 				2B2FEC921B572BD400A332BF /* AANeptune.cpp in Sources */,
 				2B0D630717A2EDA300C3298D /* DDXMLDocument.m in Sources */,
 				2BD5A84E1B41FEB500DDAEE3 /* message.cc in Sources */,
@@ -2153,7 +2144,6 @@
 				2BD5A8481B41FEB500DDAEE3 /* descriptor_database.cc in Sources */,
 				2BD5A8521B41FEB500DDAEE3 /* service.cc in Sources */,
 				2BC989C317DC1F1E0071DA9E /* NSData+Zlib.m in Sources */,
-				2B1B32031B0A6FDD00A37285 /* FMDatabaseQueue.m in Sources */,
 				2B2FEC861B572BD400A332BF /* AAJupiter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
