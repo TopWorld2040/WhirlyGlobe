@@ -1504,8 +1504,129 @@ static const int NumMegaMarkers = 15000;
                    kMaplyVecWidth: @(vecWidth),
                    kMaplyFade: @(1.0),
                    kMaplySelectable: @(true)};
-    
+  
+  
+  [self addLineJoinErrorTestCase];
 }
+
+/*
+ {
+ centered = 1;
+ color = "UIDeviceRGBColorSpace 1 0 0 1";
+ drawPriority = 10160000;
+ enable = 1;
+ fade = 0;
+ filled = 0;
+ texture = "<MaplyTexture: 0x7fa6797e0e70>";
+ wideveccoordtype = screen;
+ wideveclinejointype = bevel;
+ width = 16;
+ }
+ */
+- (void)addLineJoinErrorTestCase {
+  CGSize size = CGSizeMake(8 * [UIScreen mainScreen].scale, 32);
+  MaplyLinearTextureBuilder *lineTexBuilder = [[MaplyLinearTextureBuilder alloc] initWithSize:size];
+  [lineTexBuilder setPattern:@[@(size.height)]];
+  lineTexBuilder.opacityFunc = MaplyOpacitySin3;
+  UIImage *lineImage = [lineTexBuilder makeImage];
+  MaplyTexture *lineTexture = [baseViewC addTexture:lineImage
+             imageFormat:MaplyImageIntRGBA
+               wrapFlags:MaplyImageWrapY
+                    mode:MaplyThreadCurrent];
+  
+  { //crazy corners with bevel join
+    MaplyCoordinate coords[3];
+    coords[0] = MaplyCoordinateMake(-1.767640, 0.683086);
+    coords[1] = MaplyCoordinateMake(-1.760712, 0.619437);
+    coords[2] = MaplyCoordinateMake(-1.727610, 0.532989);
+    MaplyVectorObject *segment = [[MaplyVectorObject alloc] initWithLineString:coords
+                                                                     numCoords:3
+                                                                    attributes:nil];
+    [baseViewC addWideVectors:@[segment]
+                         desc: @{kMaplyColor: [UIColor redColor],
+                                 kMaplyFilled: @NO,
+                                 kMaplyEnable: @YES,
+                                 kMaplyFade: @0,
+                                 kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault + 10000),
+                                 kMaplyVecCentered: @YES,
+                                 kMaplyVecTexture: lineTexture,
+                                 kMaplyWideVecJoinType: kMaplyWideVecBevelJoin,
+                                 kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
+                                 kMaplyVecWidth: @(16)}
+                         mode:MaplyThreadCurrent];
+  }
+  
+  { //Almost overlapping segments drawing thin line
+    MaplyCoordinate coords[3];
+    coords[0] = MaplyCoordinateMake(-1.676768, 0.734632);
+    coords[1] = MaplyCoordinateMake(-1.766622, 0.838316);
+    coords[2] = MaplyCoordinateMake(-1.450317, 0.427211);
+    MaplyVectorObject *segment = [[MaplyVectorObject alloc] initWithLineString:coords
+                                                                     numCoords:3
+                                                                    attributes:nil];
+    [baseViewC addWideVectors:@[segment]
+                         desc: @{kMaplyColor: [UIColor blueColor],
+                                 kMaplyFilled: @NO,
+                                 kMaplyEnable: @YES,
+                                 kMaplyFade: @0,
+                                 kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault + 10000),
+                                 kMaplyVecCentered: @YES,
+                                 kMaplyVecTexture: lineTexture,
+                                 kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
+                                 kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
+                                 kMaplyVecWidth: @(16)}
+                         mode:MaplyThreadCurrent];
+  }
+  
+  
+//  { //Overlapping lines draw correctly
+//    MaplyCoordinate coords[3];
+//    coords[0] = MaplyCoordinateMake(-1.818285, 0.619751);
+//    coords[1] = MaplyCoordinateMake(-1.980915, 0.619751);
+//    coords[2] = MaplyCoordinateMake(-1.740664, 0.619751);
+//    MaplyVectorObject *segment = [[MaplyVectorObject alloc] initWithLineString:coords
+//                                                                     numCoords:3
+//                                                                    attributes:nil];
+//    [baseViewC addWideVectors:@[segment]
+//                         desc: @{kMaplyColor: [UIColor whiteColor],
+//                                 kMaplyFilled: @NO,
+//                                 kMaplyEnable: @YES,
+//                                 kMaplyFade: @0,
+//                                 kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault + 10000),
+//                                 kMaplyVecCentered: @YES,
+//                                 kMaplyVecTexture: lineTexture,
+//                                 kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
+//                                 kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
+//                                 kMaplyVecWidth: @(16)}
+//                         mode:MaplyThreadCurrent];
+//  }
+//  
+//  { //Almost overlapping lines get offset a lot
+//    MaplyCoordinate coords[3];
+//    coords[0] = MaplyCoordinateMake(-1.833495, 0.570839);
+//    coords[1] = MaplyCoordinateMake(-1.980330, 0.575754);
+//    coords[2] = MaplyCoordinateMake(-1.723698, 0.566402);
+//    MaplyVectorObject *segment = [[MaplyVectorObject alloc] initWithLineString:coords
+//                                                                     numCoords:3
+//                                                                    attributes:nil];
+//    [baseViewC addWideVectors:@[segment]
+//                         desc: @{kMaplyColor: [UIColor orangeColor],
+//                                 kMaplyFilled: @NO,
+//                                 kMaplyEnable: @YES,
+//                                 kMaplyFade: @0,
+//                                 kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault + 10000),
+//                                 kMaplyVecCentered: @YES,
+//                                 kMaplyVecTexture: lineTexture,
+//                                 kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
+//                                 kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
+//                                 kMaplyWideVecMiterLimit
+//                                 kMaplyVecWidth: @(16)}
+//                         mode:MaplyThreadCurrent];
+//  }
+}
+
+
+
 
 // Reload testing
 - (void)reloadLayer:(MaplyQuadImageTilesLayer *)layer
