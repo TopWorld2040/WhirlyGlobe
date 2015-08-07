@@ -423,6 +423,7 @@
 		2BFD27EA170B933C00127EF5 /* ZMB.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 2BFD26F1170B933C00127EF5 /* ZMB.geojson */; };
 		2BFD27EB170B933C00127EF5 /* ZWE.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 2BFD26F2170B933C00127EF5 /* ZWE.geojson */; };
 		2BFF026217A9BA2D00007842 /* AnimationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2BFF026117A9BA2D00007842 /* AnimationTest.m */; };
+		885ADB5B1B74F1FC0046120B /* track.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 885ADB5A1B74F1FC0046120B /* track.geojson */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -880,6 +881,7 @@
 		2BFD26F2170B933C00127EF5 /* ZWE.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ZWE.geojson; sourceTree = "<group>"; };
 		2BFF026017A9BA2C00007842 /* AnimationTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimationTest.h; sourceTree = "<group>"; };
 		2BFF026117A9BA2D00007842 /* AnimationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnimationTest.m; sourceTree = "<group>"; };
+		885ADB5A1B74F1FC0046120B /* track.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = track.geojson; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -959,6 +961,7 @@
 		2B62DD6316E7F0BC001F52FC /* WhirlyGlobeComponentTester */ = {
 			isa = PBXGroup;
 			children = (
+				885ADB5A1B74F1FC0046120B /* track.geojson */,
 				2B62DD7A16E7F3A2001F52FC /* AppDelegate.h */,
 				2B62DD7B16E7F3A2001F52FC /* AppDelegate.m */,
 				2B62DD7C16E7F3A2001F52FC /* ConfigViewController.h */,
@@ -1911,6 +1914,7 @@
 				2BFD27D2170B933C00127EF5 /* TON.geojson in Resources */,
 				2BFD27D3170B933C00127EF5 /* TTO.geojson in Resources */,
 				2BFD27D4170B933C00127EF5 /* TUN.geojson in Resources */,
+				885ADB5B1B74F1FC0046120B /* track.geojson in Resources */,
 				2BC0FB551964D3580043E1FD /* school-24@2x.png in Resources */,
 				2BB94D7E1A26A94B0076B1B4 /* cessna.obj in Resources */,
 				2B1012A01B5C8EF70014D243 /* moon.png in Resources */,
