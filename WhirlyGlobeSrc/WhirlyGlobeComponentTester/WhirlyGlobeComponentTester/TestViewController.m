@@ -894,11 +894,11 @@ static const int BaseEarthPriority = kMaplyImageLayerDrawPriorityDefault;
         MaplyVectorObject *vecObj = [MaplyVectorObject VectorObjectFromGeoJSONDictionary:jsonDictionary];
         if(vecObj) {
             [baseViewC addWideVectors:@[vecObj]
-                                 desc: @{kMaplyColor: [UIColor colorWithRed:1 green:0 blue:0 alpha:0.5],
+                                 desc: @{kMaplyColor: [UIColor colorWithRed:1 green:0 blue:0 alpha:0.2],
                                          kMaplyFilled: @NO,
                                          kMaplyEnable: @YES,
                                          kMaplyFade: @0,
-                                         kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault + 1),
+                                         kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault),
                                          kMaplyVecCentered: @YES,
                                          kMaplyVecTexture: lineTexture,
                                          kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
@@ -910,7 +910,7 @@ static const int BaseEarthPriority = kMaplyImageLayerDrawPriorityDefault;
                                      kMaplyFilled: @NO,
                                      kMaplyEnable: @YES,
                                      kMaplyFade: @0,
-                                     kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault),
+                                     kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault + 1),
                                      kMaplyVecCentered: @YES,
                                      kMaplyVecWidth: @(1)}
                              mode:MaplyThreadCurrent];
@@ -1609,7 +1609,11 @@ static const int NumMegaMarkers = 15000;
                    kMaplyVecWidth: @(vecWidth),
                    kMaplyFade: @(1.0),
                    kMaplySelectable: @(true)};
-    
+ 
+  
+  for(NSString *file in @[@"track.geojson", @"spiral.geojson", @"sawtooth.geojson", @"mowing-lawn.geojson"]) {
+    [self addGeoJson:file];
+  }
 }
 
 // Reload testing
