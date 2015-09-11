@@ -25,7 +25,6 @@
 #import "WeatherShader.h"
 #import "MaplyRemoteTileElevationSource.h"
 #import "PagingTestDelegate.h"
-#import "TileLabelPagingDelegate.h"
 
 #ifdef NOTPODSPECWG
 #import "MapzenSource.h"
@@ -2422,50 +2421,6 @@ static const int NumMegaMarkers = 15000;
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
 {
     [self changeMapContents];
-}
-
-
-- (void)addGeoJson:(NSString*)name {
-  CGSize size = CGSizeMake(8 * [UIScreen mainScreen].scale, 32);
-  MaplyLinearTextureBuilder *lineTexBuilder = [[MaplyLinearTextureBuilder alloc] initWithSize:size];
-  [lineTexBuilder setPattern:@[@(size.height)]];
-  lineTexBuilder.opacityFunc = MaplyOpacitySin3;
-  UIImage *lineImage = [lineTexBuilder makeImage];
-  MaplyTexture *lineTexture = [baseViewC addTexture:lineImage
-                                        imageFormat:MaplyImageIntRGBA
-                                          wrapFlags:MaplyImageWrapY
-                                               mode:MaplyThreadCurrent];
-  
-  NSString *path = [[NSBundle mainBundle] pathForResource:name ofType:nil];
-  if(path) {
-    NSData *data = [NSData dataWithContentsOfFile:path];
-    NSDictionary *jsonDictionary = [NSJSONSerialization JSONObjectWithData:data
-                                                                   options:0 error:nil];
-    MaplyVectorObject *vecObj = [MaplyVectorObject VectorObjectFromGeoJSONDictionary:jsonDictionary];
-    if(vecObj) {
-      [baseViewC addWideVectors:@[vecObj]
-                           desc: @{kMaplyColor: [UIColor colorWithRed:1 green:0 blue:0 alpha:0.5],
-                                   kMaplyFilled: @NO,
-                                   kMaplyEnable: @YES,
-                                   kMaplyFade: @0,
-                                   kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault + 1),
-                                   kMaplyVecCentered: @YES,
-                                   kMaplyVecTexture: lineTexture,
-                                   kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
-                                   kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
-                                   kMaplyVecWidth: @(8)}
-                           mode:MaplyThreadCurrent];
-      [baseViewC addVectors:@[vecObj]
-                           desc: @{kMaplyColor: [UIColor blackColor],
-                                   kMaplyFilled: @NO,
-                                   kMaplyEnable: @YES,
-                                   kMaplyFade: @0,
-                                   kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault),
-                                   kMaplyVecCentered: @YES,
-                                   kMaplyVecWidth: @(1)}
-                           mode:MaplyThreadCurrent];
-    }
-  }
 }
 
 
