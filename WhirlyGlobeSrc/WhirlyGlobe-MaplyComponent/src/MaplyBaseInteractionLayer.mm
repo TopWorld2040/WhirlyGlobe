@@ -252,16 +252,23 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     pthread_mutex_unlock(&workLock);
 }
 
-- (Texture *)createTexture:(UIImage *)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags mode:(MaplyThreadMode)threadMode
+- (Texture *)createTexture:(UIImage *)image desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
 {
-    int imgWidth = image.size.width;
-    int imgHeight = image.size.height;
+    int imageFormat = [desc intForKey:kMaplyTexFormat default:MaplyImageIntRGBA];
+    bool wrapX = [desc boolForKey:kMaplyTexWrapX default:false];
+    bool wrapY = [desc boolForKey:kMaplyTexWrapX default:false];
+    int magFilter = [desc enumForKey:kMaplyTexMagFilter values:@[kMaplyMinFilterNearest,kMaplyMinFilterLinear] default:0];
+    
+    int imgWidth = image.size.width * image.scale;
+    int imgHeight = image.size.height * image.scale;
     imgWidth = NextPowOf2(imgWidth);
     imgHeight = NextPowOf2(imgHeight);
     
     // Add it and download it
     Texture *tex = new Texture("MaplyBaseInteraction",image,imgWidth,imgHeight);
-    tex->setWrap(wrapFlags & MaplyImageWrapX, wrapFlags & MaplyImageWrapY);
+    tex->setWrap(wrapX, wrapY);
+    tex->setUsesMipmaps(false);
+    tex->setInterpType(magFilter == 0 ? GL_NEAREST : GL_LINEAR);
     switch (imageFormat)
     {
         case MaplyImageIntRGBA:
@@ -304,8 +311,11 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 }
 
 // Explicitly add a texture
-- (MaplyTexture *)addTexture:(UIImage *)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags mode:(MaplyThreadMode)threadMode
+- (MaplyTexture *)addTexture:(UIImage *)image desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
 {
+    if ([desc boolForKey:kMaplyTexAtlas default:false])
+        return [self addTextureToAtlas:image desc:desc mode:threadMode];
+    
     pthread_mutex_lock(&imageLock);
     
     // Look for an existing one
@@ -327,7 +337,7 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     {
         MaplyTexture *maplyTex = [[MaplyTexture alloc] init];
         
-        Texture *tex = [self createTexture:image imageFormat:imageFormat wrapFlags:wrapFlags mode:threadMode];
+        Texture *tex = [self createTexture:image desc:desc mode:threadMode];
         maplyTex.texID = tex->getId();
         
         changes.push_back(new AddTextureReq(tex));
@@ -344,7 +354,7 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     return maplyImageTex.maplyTex;
 }
 
-- (MaplyTexture *)addTextureToAtlas:(UIImage *)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags mode:(MaplyThreadMode)threadMode
+- (MaplyTexture *)addTextureToAtlas:(UIImage *)image desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
 {
     ChangeSet changes;
 
@@ -352,7 +362,7 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     EAGLContext *tmpContext = [self setupTempContext:threadMode];
 
     // Convert to a texture
-    Texture *tex = [self createTexture:image imageFormat:imageFormat wrapFlags:wrapFlags mode:threadMode];
+    Texture *tex = [self createTexture:image desc:desc mode:threadMode];
     if (!tex)
         return nil;
     
@@ -414,16 +424,40 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
         [texture clear];
 }
 
+// Called by the texture dealloc
+- (void)clearTexture:(MaplyTexture *)tex
+{
+    ChangeSet changes;
+
+    if (tex.isSubTex)
+    {
+        if (atlasGroup)
+        {
+            [atlasGroup removeTexture:tex.texID changes:changes];
+            scene->removeSubTexture(tex.texID);
+        }
+    } else {
+        if (scene)
+            changes.push_back(new RemTextureReq(tex.texID));
+    }
+
+    [self flushChanges:changes mode:MaplyThreadCurrent];
+}
+
 - (MaplyTexture *)addImage:(id)image imageFormat:(MaplyQuadImageFormat)imageFormat mode:(MaplyThreadMode)threadMode
 {
-    return [self addImage:image imageFormat:imageFormat wrapFlags:MaplyImageWrapNone mode:threadMode];
+    return [self addImage:image imageFormat:imageFormat wrapFlags:MaplyImageWrapNone interpType:GL_NEAREST mode:threadMode];
 }
 
 // Add an image to the cache, or find an existing one
 // Called in the layer thread
-- (MaplyTexture *)addImage:(id)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags mode:(MaplyThreadMode)threadMode
+- (MaplyTexture *)addImage:(id)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags interpType:(GLenum)interpType mode:(MaplyThreadMode)threadMode
 {
-    MaplyTexture *maplyTex = [self addTexture:image imageFormat:imageFormat wrapFlags:wrapFlags mode:threadMode];
+    MaplyTexture *maplyTex = [self addTexture:image desc:@{kMaplyTexFormat: @(imageFormat),
+                               kMaplyTexWrapX: @(wrapFlags & MaplyImageWrapX),
+                               kMaplyTexWrapY: @(wrapFlags & MaplyImageWrapY),
+                            kMaplyTexMagFilter: (interpType == GL_NEAREST ? kMaplyMinFilterNearest : kMaplyMinFilterLinear)}
+                                         mode:threadMode];
     
     return maplyTex;
 }
@@ -482,7 +516,11 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 {
     if (changes.empty())
         return;
-    
+
+    // This means we beat the layer thread setup, so we'll put this in orbit
+    if (!scene)
+        threadMode = MaplyThreadAny;
+
     switch (threadMode)
     {
         case MaplyThreadCurrent:
@@ -630,7 +668,11 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
         {
             if ([marker.image isKindOfClass:[UIImage class]])
             {
-                texs.push_back([self addImage:marker.image imageFormat:MaplyImageIntRGBA mode:threadMode]);
+                UIImage *image = marker.image;
+                GLenum interpType = GL_LINEAR;
+                if (image.size.width * image.scale == marker.size.width && image.size.height * image.scale == marker.size.height)
+                    interpType = GL_NEAREST;
+                texs.push_back([self addImage:marker.image imageFormat:MaplyImageIntRGBA wrapFlags:0 interpType:GL_LINEAR mode:threadMode]);
             } else if ([marker.image isKindOfClass:[MaplyTexture class]])
             {
                 texs.push_back((MaplyTexture *)marker.image);
@@ -640,7 +682,7 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
             for (id image in marker.images)
             {
                 if ([image isKindOfClass:[UIImage class]])
-                    texs.push_back([self addImage:image imageFormat:MaplyImageIntRGBA mode:threadMode]);
+                    texs.push_back([self addImage:image imageFormat:MaplyImageIntRGBA wrapFlags:0 interpType:GL_LINEAR mode:threadMode]);
                 else if ([image isKindOfClass:[MaplyTexture class]])
                     texs.push_back((MaplyTexture *)image);
             }
@@ -2573,6 +2615,7 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
         
         SimpleIdentity partSysID = partSysManager->addParticleSystem(wkPartSys, changes);
         partSys.ident = partSysID;
+        compObj.partSysIDs.insert(partSysID);
     }
     
     [self flushChanges:changes mode:threadMode];
@@ -2684,6 +2727,7 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
     BillboardManager *billManager = (BillboardManager *)scene->getManager(kWKBillboardManager);
     GeometryManager *geomManager = (GeometryManager *)scene->getManager(kWKGeometryManager);
     WhirlyKitFontTextureManager *fontTexManager = scene->getFontTextureManager();
+    ParticleSystemManager *partSysManager = (ParticleSystemManager *)scene->getManager(kWKParticleSystemManager);
 
     ChangeSet changes;
         
@@ -2725,6 +2769,11 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
                 if (fontTexManager && !userObj.drawStringIDs.empty())
                     for (SimpleIdentity dStrID : userObj.drawStringIDs)
                         [fontTexManager removeString:dStrID changes:changes];
+                if (partSysManager && !userObj.partSysIDs.empty())
+                {
+                    for (SimpleIdentity partSysID : userObj.partSysIDs)
+                        partSysManager->removeParticleSystem(partSysID, changes);
+                }
                 
                 // And associated textures
                 for (std::set<MaplyTexture *>::iterator it = userObj.textures.begin();

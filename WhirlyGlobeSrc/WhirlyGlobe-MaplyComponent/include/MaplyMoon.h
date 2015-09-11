@@ -42,4 +42,7 @@
 /// @brief Illuminated fraction of the moon
 @property (readonly) double illuminatedFraction;
 
+/// @brief Phase of the moon.
+@property (readonly) double phase;
+
 @end

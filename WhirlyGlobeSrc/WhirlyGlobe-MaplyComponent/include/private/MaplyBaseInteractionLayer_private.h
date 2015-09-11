@@ -135,13 +135,13 @@
 - (void)disableObjects:(NSArray *)userObjs mode:(MaplyThreadMode)threadMode;
 
 // Explicitly add a texture
-- (MaplyTexture *)addTexture:(UIImage *)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags mode:(MaplyThreadMode)threadMode;
+- (MaplyTexture *)addTexture:(UIImage *)image desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode;
 
 // Explicitly remove a texture
 - (void)removeTextures:(NSArray *)textures mode:(MaplyThreadMode)threadMode;
 
 // Add a texture to an atlas
-- (MaplyTexture *)addTextureToAtlas:(UIImage *)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags mode:(MaplyThreadMode)threadMode;
+- (MaplyTexture *)addTextureToAtlas:(UIImage *)image desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode;
 
 // Start collecting changes for this thread
 - (void)startChanges;
@@ -152,7 +152,7 @@
 ///// Internal routines.  Don't ever call these outside of the layer thread.
 
 // An internal routine to add an image to our local UIImage/ID cache
-- (MaplyTexture *)addImage:(id)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags mode:(MaplyThreadMode)threadMode;
+- (MaplyTexture *)addImage:(id)image imageFormat:(MaplyQuadImageFormat)imageFormat wrapFlags:(int)wrapFlags interpType:(GLenum)interpType mode:(MaplyThreadMode)threadMode;
 
 // This version defaults the wrap flags
 - (MaplyTexture *)addImage:(id)image imageFormat:(MaplyQuadImageFormat)imageFormat mode:(MaplyThreadMode)threadMode;
@@ -176,5 +176,8 @@
 
 // Shutdown that waits for absolutely everything to end
 - (void)lockingShutdown;
+
+// Clean up a given texture
+- (void)clearTexture:(MaplyTexture *)tex;
 
 @end
