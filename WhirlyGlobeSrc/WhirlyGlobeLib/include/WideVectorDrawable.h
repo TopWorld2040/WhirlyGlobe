@@ -40,9 +40,6 @@ public:
     void addDir(const Point3f &dir);
     void addDir(const Point3d &dir);
 
-    /// Each vertex has a maximum length from the center vertex
-    void addMaxLen(double len);
-    
     /// How often the texture repeats
     void setTexRepeat(float inTexRepeat) { texRepeat = inTexRepeat; }
     
@@ -53,11 +50,6 @@ protected:
     bool snapTex;
     float texRepeat;
     int offsetIndex;
-    int lenIndex;
-    
-    // Note: Debugging
-//    std::vector<Point3d> dirs;
-//    std::vector<double> lens;
 };
     
 }
