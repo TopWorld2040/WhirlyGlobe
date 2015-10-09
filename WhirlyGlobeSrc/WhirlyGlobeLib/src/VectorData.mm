@@ -24,6 +24,8 @@
 #import "libjson.h"
 #import "NSString+Stuff.h"
 
+#define JSONNode JSONWGNode
+
 namespace WhirlyKit
 {
 
