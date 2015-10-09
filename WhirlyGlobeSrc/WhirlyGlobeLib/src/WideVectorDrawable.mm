@@ -64,7 +64,7 @@ void WideVectorDrawable::draw(WhirlyKitRendererFrameInfo *frameInfo, Scene *scen
     
     if (frameInfo.program)
     {
-        float scale = std::max(frameInfo.sceneRenderer.framebufferWidth,frameInfo.sceneRenderer.framebufferHeight);
+        float scale = frameInfo.sceneRenderer.framebufferWidth;
         float screenSize = frameInfo.screenSizeInDisplayCoords.x();
         float pixDispSize = std::min(frameInfo.screenSizeInDisplayCoords.x(),frameInfo.screenSizeInDisplayCoords.y()) / scale;
         frameInfo.program->setUniform("u_scale", 1.f/scale);

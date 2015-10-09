@@ -321,64 +321,49 @@ public:
             // Bending right
             if (t0l > 1.0)
             {
-                // Make sure we didn't exceed the length of either segment
-                if (t0r > 0.0 && t0r < 1.0 && t1r > 0.0 && t1r < 1.0)
+                if (vecInfo.coordType == WideVecCoordReal)
                 {
-                    if (vecInfo.coordType == WideVecCoordReal)
-                    {
-                        corners[2] = rPt;
-                        corners[3] = rPt + revNorm0 * 2;
-                        next_e0 = rPt + revNorm1 * 2;
-                        next_e1 = corners[2];
-                    } else {
-                        corners[2] = rPt;
-                        corners[3] = rPt + revNorm0 * calcScale * 2;
-                        
-                        next_e0 = rPt + revNorm1 * calcScale * 2;
-                        next_e1 = corners[2];
-                    }
-                } else
-                    iPtsValid = false;
+                    corners[2] = rPt;
+                    corners[3] = rPt + revNorm0 * 2;
+                    next_e0 = rPt + revNorm1 * 2;
+                    next_e1 = corners[2];
+                } else {
+                    corners[2] = rPt;
+                    corners[3] = rPt + revNorm0 * calcScale * 2;
+
+                    next_e0 = rPt + revNorm1 * calcScale * 2;
+                    next_e1 = corners[2];
+                }
             } else {
                 // Bending left
-                // Make sure we didn't exceed the length of either segment
-                if (t0l > 0.0 && t0l < 1.0 && t1l > 0.0 && t1l < 1.0)
+                if (vecInfo.coordType == WideVecCoordReal)
                 {
-                    if (vecInfo.coordType == WideVecCoordReal)
-                    {
-                        corners[2] = lPt + norm0 * 2;
-                        corners[3] = lPt;
-                        next_e0 = corners[3];
-                        next_e1 = lPt + norm1 * 2;
-                    } else {
-                        corners[2] = lPt + norm0 * calcScale * 2;
-                        corners[3] = lPt;
+                    corners[2] = lPt + norm0 * 2;
+                    corners[3] = lPt;
+                    next_e0 = corners[3];
+                    next_e1 = lPt + norm1 * 2;
+                } else {
+                    corners[2] = lPt + norm0 * calcScale * 2;
+                    corners[3] = lPt;
 
-                        next_e0 = lPt;
-                        next_e1 = lPt + norm1 * calcScale * 2;
-                    }
-                } else
-                    iPtsValid = false;
+                    next_e0 = lPt;
+                    next_e1 = lPt + norm1 * calcScale * 2;
+                }
             }
-        }
-        
-        if (!iPtsValid)
-        {
+        } else {
             if (vecInfo.coordType == WideVecCoordReal)
             {
                 corners[2] = pbLocal + norm0;
                 corners[3] = pbLocal + revNorm0;
-                next_e0 = corners[3];
-                next_e1 = corners[2];
+                next_e0 = corners[2];
+                next_e1 = corners[3];
             } else {
                 corners[2] = pbLocal + norm0 * calcScale;
                 corners[3] = pbLocal + revNorm0 * calcScale;
-                next_e0 = corners[3];
-                next_e1 = corners[2];
+                next_e0 = corners[2];
+                next_e1 = corners[3];
             }
-            edgePointsValid = false;
-        } else
-            edgePointsValid = true;
+        }
         
         texCoords[0] = TexCoord(0.0,texOffset);
         texCoords[1] = TexCoord(1.0,texOffset);
@@ -508,10 +493,9 @@ public:
                     {
                         // lPt1 is a point in the middle of the prospective bevel
                         Point3d lNorm = (lPt-pbLocal).normalized();
-                        Point3d lPt1 = pbLocal + lNorm * calcScale * (vecInfo.coordType == WideVecCoordReal ? vecInfo.width : 1.0);
+                        Point3d lPt1 = rPt + lNorm * calcScale * (vecInfo.coordType == WideVecCoordReal ? vecInfo.width : 1.0);
                         Point3d iNorm = up.cross(lNorm);
-//                        Point3d juncCtr = (rPt+lPt1)/2.0;
-//                        pbLocalAdj = juncCtr;
+                        pbLocalAdj = (rPt+lPt1)/2.0;
                         
                         // Find the intersection points with the edges along the left side
                         Point3d li0,li1;
@@ -574,10 +558,9 @@ public:
                         // Bending left
                         // rPt1 is a point in the middle of the prospective bevel
                         Point3d rNorm = (rPt-pbLocal).normalized();
-                        Point3d rPt1 = pbLocal + rNorm * calcScale * (vecInfo.coordType == WideVecCoordReal ? vecInfo.width : 1.0);
+                        Point3d rPt1 = lPt + rNorm * calcScale * (vecInfo.coordType == WideVecCoordReal ? vecInfo.width : 1.0);
                         Point3d iNorm = rNorm.cross(up);
-//                        Point3d juncCtr = (lPt+rPt1)/2.0;
-                        //                        pbLocalAdj = juncCtr;
+                        pbLocalAdj = (lPt+rPt1)/2.0;
                         
                         // Find the intersection points with the edges along the right side
                         Point3d ri0,ri1;
@@ -654,12 +637,13 @@ public:
             for (unsigned int ii=0;ii<4;ii++)
                 cornerVecs[ii] = (corners[ii]-((ii < 2) ? centerAdj : pbLocalAdj))/calcScale;
 
-            addWideRect(wideDrawable,cornerVecs,centerAdj,pbLocalAdj,texCoords,up,thisColor);
+            addWideRect(wideDrawable,cornerVecs,paLocal,pbLocal,texCoords,up,thisColor);
         }
         
         e0 = next_e0;
         e1 = next_e1;
         centerAdj = pbLocalAdj;
+        edgePointsValid = true;
         texOffset += texLen+texJoinLen;
     }
     
