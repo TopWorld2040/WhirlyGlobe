@@ -25,6 +25,7 @@
 #import "WeatherShader.h"
 #import "MaplyRemoteTileElevationSource.h"
 #import "PagingTestDelegate.h"
+#import "PolyLine.h"
 #ifdef NOTPODSPECWG
 #import "MapzenSource.h"
 #endif
@@ -1719,8 +1720,14 @@ static const int NumMegaMarkers = 15000;
                    kMaplyVecWidth: @(vecWidth),
                    kMaplyFade: @(1.0),
                    kMaplySelectable: @(true)};
-    
+ 
+  
+  for(NSString *file in @[@"sawtooth", @"spiral", @"track"]) {
+    NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"geojson"];
+    [self addPolyline:path];
+  }
 }
+
 
 // Reload testing
 - (void)reloadLayer:(MaplyQuadImageTilesLayer *)layer
@@ -2522,5 +2529,47 @@ static const int NumMegaMarkers = 15000;
 {
     [self changeMapContents];
 }
+
+
+- (void)addPolyline:(NSString*)geoJsonPath {
+  CGSize size = CGSizeMake(8 * [UIScreen mainScreen].scale, 32);
+  MaplyLinearTextureBuilder *lineTexBuilder = [[MaplyLinearTextureBuilder alloc] initWithSize:size];
+  [lineTexBuilder setPattern:@[@(size.height)]];
+  lineTexBuilder.opacityFunc = MaplyOpacitySin3;
+  UIImage *lineImage = [lineTexBuilder makeImage];
+  MaplyTexture *lineTexture = [baseViewC addTexture:lineImage
+                                        imageFormat:MaplyImageIntRGBA
+                                          wrapFlags:MaplyImageWrapY
+                                               mode:MaplyThreadCurrent];
+  
+  NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfFile:geoJsonPath]
+                                                           options:0
+                                                             error:nil];
+  NSArray *features;
+  if([jsonDict[@"type"] isEqualToString:@"Feature"]) {
+    features = @[jsonDict];
+  } else if([jsonDict[@"type"] isEqualToString:@"FeatureCollection"]) {
+    features = jsonDict[@"features"];
+  }
+  for(NSDictionary *feature in features) {
+    PolyLine *p = [[PolyLine alloc] initWithCoordinates:feature[@"geometry"][@"coordinates"]
+                                                 forMap:baseViewC];
+    [baseViewC addWideVectors:p.vectors
+                         desc: @{kMaplyColor: [UIColor colorWithRed:1 green:0 blue:0 alpha:0.2],
+                                 kMaplyFilled: @NO,
+                                 kMaplyEnable: @YES,
+                                 kMaplyFade: @0,
+                                 kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault),
+                                 kMaplyVecCentered: @YES,
+                                 kMaplyVecTexture: lineTexture,
+                                 kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
+                                 kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
+                                 kMaplyVecWidth: @(8)}
+                         mode:MaplyThreadCurrent];
+    
+  }
+}
+
+
 
 @end

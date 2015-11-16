@@ -7,12 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2B0B8DD31BB330E70060C70D /* redsquare.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B0B8DD11BB330E70060C70D /* redsquare.png */; settings = {ASSET_TAGS = (); }; };
-		2B0B8DD41BB330E70060C70D /* bluesquare.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B0B8DD21BB330E70060C70D /* bluesquare.png */; settings = {ASSET_TAGS = (); }; };
-		2B1012A01B5C8EF70014D243 /* moon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B10129F1B5C8EF70014D243 /* moon.png */; };
+		2B0B8DD31BB330E70060C70D /* redsquare.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B0B8DD11BB330E70060C70D /* redsquare.png */; };
+		2B0B8DD41BB330E70060C70D /* bluesquare.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B0B8DD21BB330E70060C70D /* bluesquare.png */; };
 		2B14BFC11B82A42600CE29A4 /* PagingTestDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B14BFC01B82A42600CE29A4 /* PagingTestDelegate.m */; };
 		2B2EB66518C901AD008C5320 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B62DDB516E7F505001F52FC /* OpenGLES.framework */; };
-		2B2FECB31B5878EC00A332BF /* starcatalog_orig.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2B2FECB21B5878EC00A332BF /* starcatalog_orig.txt */; };
 		2B4B6C011BB1BC450080036E /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4B6C001BB1BC450080036E /* libc++.tbd */; };
 		2B4B6C031BB1BC4A0080036E /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4B6C021BB1BC4A0080036E /* libz.tbd */; };
 		2B4B6C051BB1BC520080036E /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4B6C041BB1BC520080036E /* libsqlite3.tbd */; };
@@ -426,6 +424,10 @@
 		2BFD27EA170B933C00127EF5 /* ZMB.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 2BFD26F1170B933C00127EF5 /* ZMB.geojson */; };
 		2BFD27EB170B933C00127EF5 /* ZWE.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 2BFD26F2170B933C00127EF5 /* ZWE.geojson */; };
 		2BFF026217A9BA2D00007842 /* AnimationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2BFF026117A9BA2D00007842 /* AnimationTest.m */; };
+		88DB400F1BFA4E9700402249 /* PolyLine.m in Sources */ = {isa = PBXBuildFile; fileRef = 88DB400E1BFA4E9700402249 /* PolyLine.m */; };
+		88DB40121BFA589200402249 /* sawtooth.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 88DB40111BFA589200402249 /* sawtooth.geojson */; };
+		88DB40141BFA5FEF00402249 /* spiral.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 88DB40131BFA5FEF00402249 /* spiral.geojson */; };
+		88DB40161BFA6B6C00402249 /* track.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 88DB40151BFA6B6C00402249 /* track.geojson */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -891,6 +893,11 @@
 		2BFD26F2170B933C00127EF5 /* ZWE.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ZWE.geojson; sourceTree = "<group>"; };
 		2BFF026017A9BA2C00007842 /* AnimationTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimationTest.h; sourceTree = "<group>"; };
 		2BFF026117A9BA2D00007842 /* AnimationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnimationTest.m; sourceTree = "<group>"; };
+		88DB400D1BFA4E9700402249 /* PolyLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PolyLine.h; sourceTree = "<group>"; };
+		88DB400E1BFA4E9700402249 /* PolyLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PolyLine.m; sourceTree = "<group>"; };
+		88DB40111BFA589200402249 /* sawtooth.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = sawtooth.geojson; path = ../../sawtooth.geojson; sourceTree = "<group>"; };
+		88DB40131BFA5FEF00402249 /* spiral.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = spiral.geojson; path = ../../spiral.geojson; sourceTree = "<group>"; };
+		88DB40151BFA6B6C00402249 /* track.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = track.geojson; path = ../../track.geojson; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -917,6 +924,9 @@
 		2B62DD5116E7F0BC001F52FC = {
 			isa = PBXGroup;
 			children = (
+				88DB40151BFA6B6C00402249 /* track.geojson */,
+				88DB40131BFA5FEF00402249 /* spiral.geojson */,
+				88DB40111BFA589200402249 /* sawtooth.geojson */,
 				2BC989E117DC28350071DA9E /* libz.dylib */,
 				2BB54EE117CEB8A20065451F /* Default@2x.png */,
 				2BB54EDE17CEB88F0065451F /* Default-568h@2x.png */,
@@ -993,6 +1003,8 @@
 				2B62DD8516E7F3A2001F52FC /* TestViewController.m */,
 				2B62DD6416E7F0BC001F52FC /* Supporting Files */,
 				2BFD25D8170B929E00127EF5 /* resources */,
+				88DB400D1BFA4E9700402249 /* PolyLine.h */,
+				88DB400E1BFA4E9700402249 /* PolyLine.m */,
 			);
 			path = WhirlyGlobeComponentTester;
 			sourceTree = "<group>";
@@ -1714,7 +1726,6 @@
 				2BFD2735170B933C00127EF5 /* EGY.geojson in Resources */,
 				2BC0FB5E1964D3580043E1FD /* suitcase-24@2x.png in Resources */,
 				2BFD2736170B933C00127EF5 /* ERI.geojson in Resources */,
-				2B2FECB31B5878EC00A332BF /* starcatalog_orig.txt in Resources */,
 				2BFD2737170B933C00127EF5 /* ESH.geojson in Resources */,
 				2BFD2738170B933C00127EF5 /* ESP.geojson in Resources */,
 				2BFD2739170B933C00127EF5 /* EST.geojson in Resources */,
@@ -1729,6 +1740,7 @@
 				2BFD273F170B933C00127EF5 /* FRO.geojson in Resources */,
 				2BFD2740170B933C00127EF5 /* FSM.geojson in Resources */,
 				2BFD2741170B933C00127EF5 /* GAB.geojson in Resources */,
+				88DB40161BFA6B6C00402249 /* track.geojson in Resources */,
 				2BFD2742170B933C00127EF5 /* GBR.geojson in Resources */,
 				2BFD2743170B933C00127EF5 /* GEO.geojson in Resources */,
 				2BFD2744170B933C00127EF5 /* GGY.geojson in Resources */,
@@ -1796,6 +1808,7 @@
 				2BFD2771170B933C00127EF5 /* LBR.geojson in Resources */,
 				2BFD2772170B933C00127EF5 /* LBY.geojson in Resources */,
 				2BFD2773170B933C00127EF5 /* LCA.geojson in Resources */,
+				88DB40121BFA589200402249 /* sawtooth.geojson in Resources */,
 				2BFD2774170B933C00127EF5 /* LIE.geojson in Resources */,
 				2BFD2775170B933C00127EF5 /* LKA.geojson in Resources */,
 				2BC0FB201964D3580043E1FD /* dam-24@2x.png in Resources */,
@@ -1872,6 +1885,7 @@
 				2BFD27A6170B933C00127EF5 /* POL.geojson in Resources */,
 				2BC0FB2A1964D3580043E1FD /* fuel-24@2x.png in Resources */,
 				2BFD27A7170B933C00127EF5 /* PRI.geojson in Resources */,
+				88DB40141BFA5FEF00402249 /* spiral.geojson in Resources */,
 				2BC0FB0C1964D3580043E1FD /* baseball-24@2x.png in Resources */,
 				2BFD27A8170B933C00127EF5 /* PRK.geojson in Resources */,
 				2BFD27A9170B933C00127EF5 /* PRT.geojson in Resources */,
@@ -1934,7 +1948,6 @@
 				2BFD27D4170B933C00127EF5 /* TUN.geojson in Resources */,
 				2BC0FB551964D3580043E1FD /* school-24@2x.png in Resources */,
 				2BB94D7E1A26A94B0076B1B4 /* cessna.obj in Resources */,
-				2B1012A01B5C8EF70014D243 /* moon.png in Resources */,
 				2BFD27D5170B933C00127EF5 /* TUR.geojson in Resources */,
 				2B8D1E9B1AB0BC8900996F19 /* MapzenGLStyle.json in Resources */,
 				2BC0FB361964D3580043E1FD /* lodging-24@2x.png in Resources */,
@@ -2003,6 +2016,7 @@
 				2B62DD8716E7F3A2001F52FC /* ConfigViewController.m in Sources */,
 				2B62DD8A16E7F3A2001F52FC /* StartupViewController.m in Sources */,
 				2B62DD8B16E7F3A2001F52FC /* TestViewController.m in Sources */,
+				88DB400F1BFA4E9700402249 /* PolyLine.m in Sources */,
 				2BD5A83D1B419C3B00DDAEE3 /* MapzenSource.m in Sources */,
 				2BFF026217A9BA2D00007842 /* AnimationTest.m in Sources */,
 				2BC989A817DA66BB0071DA9E /* WeatherShader.m in Sources */,
