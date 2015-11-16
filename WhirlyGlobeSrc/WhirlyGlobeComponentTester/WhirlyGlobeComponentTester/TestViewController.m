@@ -1722,7 +1722,10 @@ static const int NumMegaMarkers = 15000;
                    kMaplySelectable: @(true)};
  
   
-  for(NSString *file in @[@"sawtooth", @"spiral", @"track"]) {
+  for(NSString *file in @[@"sawtooth",
+                          @"spiral",
+                          @"track"
+                          ]) {
     NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"geojson"];
     [self addPolyline:path];
   }
@@ -2551,22 +2554,26 @@ static const int NumMegaMarkers = 15000;
   } else if([jsonDict[@"type"] isEqualToString:@"FeatureCollection"]) {
     features = jsonDict[@"features"];
   }
+  NSDictionary *attributes = @{kMaplyColor: [UIColor colorWithRed:1 green:0 blue:0 alpha:0.2],
+                               kMaplyFilled: @NO,
+                               kMaplyEnable: @YES,
+                               kMaplyFade: @0,
+                               kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault),
+                               kMaplyVecCentered: @YES,
+                               kMaplyVecTexture: lineTexture,
+                               kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
+                               kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
+                               kMaplyVecWidth: @(8)};
   for(NSDictionary *feature in features) {
     PolyLine *p = [[PolyLine alloc] initWithCoordinates:feature[@"geometry"][@"coordinates"]
                                                  forMap:baseViewC];
-    [baseViewC addWideVectors:p.vectors
-                         desc: @{kMaplyColor: [UIColor colorWithRed:1 green:0 blue:0 alpha:0.2],
-                                 kMaplyFilled: @NO,
-                                 kMaplyEnable: @YES,
-                                 kMaplyFade: @0,
-                                 kMaplyDrawPriority: @(kMaplyVectorDrawPriorityDefault),
-                                 kMaplyVecCentered: @YES,
-                                 kMaplyVecTexture: lineTexture,
-                                 kMaplyWideVecJoinType: kMaplyWideVecMiterJoin,
-                                 kMaplyWideVecCoordType: kMaplyWideVecCoordTypeScreen,
-                                 kMaplyVecWidth: @(8)}
-                         mode:MaplyThreadCurrent];
-    
+    for(MaplyVectorObject *vec in p.vectors) {
+      NSMutableDictionary *vecProperties = [attributes mutableCopy];
+      [vecProperties addEntriesFromDictionary:(NSDictionary*)vec.userObject];
+      [baseViewC addWideVectors:@[vec]
+                           desc:vecProperties
+                           mode:MaplyThreadCurrent];
+    }
   }
 }
 

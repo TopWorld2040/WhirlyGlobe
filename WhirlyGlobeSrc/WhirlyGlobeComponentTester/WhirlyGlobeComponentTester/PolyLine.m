@@ -12,6 +12,7 @@
 @interface PolyLine ()
 
 @property (nonatomic, strong, readwrite) NSArray * vectors;
+@property (nonatomic, strong) NSMutableDictionary *properties;
 
 @end
 
@@ -68,7 +69,7 @@
       simplifiedCoords = coords;
       simpleLength = count;
     } else {
-      double simplifyTolerance = 1.0/(powf((double)z, 5.0)/32.0);
+      double simplifyTolerance = 1.0/(powf((double)z, 5.0)/24.0);
       simplifiedCoords = [PolyLine poly_simplify:coords
                                      arrayLength:count
                                    withTolerance:simplifyTolerance
@@ -102,10 +103,10 @@
                      kMaplyMinVis:@([self zoomToHeight:z + zStride forMap:map]),
                      };
     }
-    NSLog(@"%@", properties);
     MaplyVectorObject *vector = [[MaplyVectorObject alloc] initWithLineString:maplyCoords
                                                                     numCoords:(int)simpleLength
-                                                                   attributes:properties];
+                                                                   attributes:nil];
+    vector.userObject = properties;
     [vectors addObject:vector];
     
     free(maplyCoords);
