@@ -146,6 +146,9 @@ static const int BaseEarthPriority = kMaplyImageLayerDrawPriorityDefault;
     MaplyTexture *dashedLineTex,*filledLineTex;
     
     PerformanceMode perfMode;
+  
+  MaplyQuadImageTilesLayer *alphaTestLayer;
+  CGFloat lastAlpha;
 }
 
 // Change what we're showing based on the Configuration
@@ -1719,7 +1722,8 @@ static const int NumMegaMarkers = 15000;
                    kMaplyVecWidth: @(vecWidth),
                    kMaplyFade: @(1.0),
                    kMaplySelectable: @(true)};
-    
+  
+    [self addTestLayer];
 }
 
 // Reload testing
@@ -2522,5 +2526,44 @@ static const int NumMegaMarkers = 15000;
 {
     [self changeMapContents];
 }
+
+
+- (void)addTestLayer {
+  MaplyRemoteTileSource *tileSource = [[MaplyRemoteTileSource alloc] initWithBaseURL:@"http://tile.stamen.com/watercolor/" ext:@"png" minZoom:0 maxZoom:16];
+  NSString *cacheDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)  objectAtIndex:0];
+  tileSource.cacheDir = [NSString stringWithFormat:@"%@/stamentiles/",cacheDir];
+  MaplyQuadImageTilesLayer *layer = [[MaplyQuadImageTilesLayer alloc] initWithCoordSystem:tileSource.coordSys tileSource:tileSource];
+  [baseViewC addLayer:layer];
+  layer.singleLevelLoading = (startupMapType == Maply2DMap);
+  lastAlpha = 1.0;
+  layer.color = [UIColor colorWithRed:lastAlpha
+                                green:lastAlpha
+                                 blue:lastAlpha
+                                alpha:lastAlpha];
+  alphaTestLayer = layer;
+  UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(10, self.view.frame.size.height - 50, self.view.frame.size.width - 20, 50)];
+  slider.continuous = YES;
+  slider.value = 1.0;
+  slider.minimumValue = 0;
+  slider.maximumValue = lastAlpha;
+  [slider addTarget:self
+             action:@selector(sliderChanged:)
+   forControlEvents:UIControlEventValueChanged];
+  [self.view addSubview:slider];
+  [baseViewC addLayer:alphaTestLayer];
+}
+
+
+- (void)sliderChanged:(UISlider*)slider {
+  CGFloat alpha = slider.value;
+  if(fabs(lastAlpha - alpha) > 0.05) { //dont update it to much
+    lastAlpha = alpha;
+    NSLog(@"Set layer alpha %f", alpha);
+    alphaTestLayer.color = [UIColor colorWithRed:alpha green:alpha blue:alpha alpha:alpha];
+    //[alphaTestLayer reload]; //this does not cause the layer to update
+    [alphaTestLayer reset]; //This works, but causes the layer to remove all tiles from screen, then reload them
+  }
+}
+
 
 @end
