@@ -833,6 +833,10 @@ typedef enum {MaplyThreadCurrent,MaplyThreadAny} MaplyThreadMode;
   */
 - (void)addShaderProgram:(MaplyShader *)shader sceneName:(NSString *)sceneName;
 
+/** @brief Removed a previously added shader.
+ */
+- (void)removeShaderProgram:(MaplyShader *)shader;
+
 /** @brief Look for a shader with the given name.  
     @details This is the shader's own name as specified in the init call, not the scene name as might be specified in addShaderProgram:sceneName:
     @return Returns the registered shader if it found one.
