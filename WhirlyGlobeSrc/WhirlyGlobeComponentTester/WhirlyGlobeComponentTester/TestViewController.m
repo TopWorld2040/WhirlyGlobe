@@ -2527,23 +2527,62 @@ static const int NumMegaMarkers = 15000;
     [self changeMapContents];
 }
 
-
+NSString *shaderName = @"Special Shader";
 - (void)addTestLayer {
+  NSString *vertexShaderNoLightTri =
+  @"uniform mat4 u_mvpMatrix; \n"
+  "uniform float u_fade; \n"
+  "uniform float u_fadeOverride;\n"
+  "attribute vec3 a_position; \n"
+  "attribute vec2 a_texCoord0; \n"
+  "attribute vec4 a_color; \n"
+  "attribute vec3 a_normal; \n"
+  "\n"
+  "varying vec2 v_texCoord; \n"
+  "varying vec4 v_color; \n"
+  "\n"
+  "void main() \n"
+  "{ \n"
+  " v_texCoord = a_texCoord0; \n"
+  " v_color = a_color * u_fade * u_fadeOverride;\n"
+  "\n"
+  " gl_Position = u_mvpMatrix * vec4(a_position,1.0); \n"
+  "} \n"
+  ;
+  
+  NSString *fragmentShaderNoLightTri =
+  @"precision mediump float; \n"
+  "\n"
+  "uniform sampler2D s_baseMap0; \n"
+  "uniform bool u_hasTexture; \n"
+  "\n"
+  "varying vec2 v_texCoord; \n"
+  "varying vec4 v_color; \n"
+  "\n"
+  "void main() \n"
+  "{ \n"
+  " vec4 baseColor = u_hasTexture ? texture2D(s_baseMap0, v_texCoord) : vec4(1.0,1.0,1.0,1.0); \n"
+  " gl_FragColor = v_color * baseColor; \n"
+  "} \n"
+  ;
+
+
+  MaplyShader *baseShader = [[MaplyShader alloc] initWithName:shaderName vertex:vertexShaderNoLightTri fragment:fragmentShaderNoLightTri viewC:baseViewC];
+  [baseShader setUniformFloatNamed:@"u_fadeOverride" val:1.0];
+  [baseViewC addShaderProgram:baseShader sceneName:shaderName];
+  
   MaplyRemoteTileSource *tileSource = [[MaplyRemoteTileSource alloc] initWithBaseURL:@"http://tile.stamen.com/watercolor/" ext:@"png" minZoom:0 maxZoom:16];
-  NSString *cacheDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)  objectAtIndex:0];
+  NSString *cacheDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
   tileSource.cacheDir = [NSString stringWithFormat:@"%@/stamentiles/",cacheDir];
   MaplyQuadImageTilesLayer *layer = [[MaplyQuadImageTilesLayer alloc] initWithCoordSystem:tileSource.coordSys tileSource:tileSource];
   [baseViewC addLayer:layer];
   layer.singleLevelLoading = (startupMapType == Maply2DMap);
   lastAlpha = 1.0;
-  layer.color = [UIColor colorWithRed:lastAlpha
-                                green:lastAlpha
-                                 blue:lastAlpha
-                                alpha:lastAlpha];
+  layer.shaderProgramName = shaderName;
   alphaTestLayer = layer;
   UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(10, self.view.frame.size.height - 50, self.view.frame.size.width - 20, 50)];
   slider.continuous = YES;
-  slider.value = 1.0;
+  slider.value = lastAlpha;
   slider.minimumValue = 0;
   slider.maximumValue = lastAlpha;
   [slider addTarget:self
@@ -2553,15 +2592,13 @@ static const int NumMegaMarkers = 15000;
   [baseViewC addLayer:alphaTestLayer];
 }
 
-
 - (void)sliderChanged:(UISlider*)slider {
   CGFloat alpha = slider.value;
   if(fabs(lastAlpha - alpha) > 0.05) { //dont update it to much
     lastAlpha = alpha;
     NSLog(@"Set layer alpha %f", alpha);
-    alphaTestLayer.color = [UIColor colorWithRed:alpha green:alpha blue:alpha alpha:alpha];
-    //[alphaTestLayer reload]; //this does not cause the layer to update
-    [alphaTestLayer reset]; //This works, but causes the layer to remove all tiles from screen, then reload them
+    MaplyShader *shader = [baseViewC getShaderByName:@"Special Shader"];
+    [shader setUniformFloatNamed:@"u_fadeOverride" val:alpha];
   }
 }
 
