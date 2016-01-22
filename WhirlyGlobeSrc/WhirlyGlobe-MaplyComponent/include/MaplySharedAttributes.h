@@ -134,6 +134,7 @@
 #define kMaplyTextOutlineColor @"outlineColor"
 
 /// These are used for screen and regular markers.
+#define kMaplyClusterGroup @"clusterGroup"
 
 /// Color is used for the polygon generated for a marker.  It will combine with the image,
 ///  if there is one or it will be visible if there is no texture.  Takes a UIColor
@@ -189,6 +190,9 @@
 //#define kMaplyWideVecRoundJoin @"round"
 /// Widened vectors are joined with a bevel
 #define kMaplyWideVecBevelJoin @"bevel"
+
+/// Number of pixels to use in blending the edges of the wide vectors
+#define kMaplyWideVecEdgeFalloff @"edgefalloff"
 
 /// For wide vectors we can control the ends
 /// See: http://www.w3.org/TR/SVG/painting.html#StrokeLinecapProperty

@@ -38,6 +38,7 @@
 #import "MaplyVertexAttribute_private.h"
 #import "MaplyParticleSystem_private.h"
 #import "MaplyShape_private.h"
+#import "MaplyPoints_private.h"
 
 using namespace Eigen;
 using namespace WhirlyKit;
@@ -156,6 +157,45 @@ public:
 };
 typedef std::set<ThreadChanges> ThreadChangeSet;
 
+typedef std::map<int,NSObject <MaplyClusterGenerator> *> ClusterGenMap;
+
+@interface MaplyBaseInteractionLayer()
+- (void) startLayoutObjects;
+- (void) makeLayoutObject:(int)clusterID layoutObjects:(const std::vector<LayoutObjectEntry *> &)layoutObjects retObj:(LayoutObject &)retObj;
+- (void) endLayoutObjects;
+- (void) clusterID:(SimpleIdentity)clusterID params:(ClusterGenerator::ClusterClassParams &)params;
+@end
+
+// Interface between the layout manager and the cluster generators
+class OurClusterGenerator : public ClusterGenerator
+{
+public:
+    MaplyBaseInteractionLayer *layer;
+    
+    // Called right before we start generating layout objects
+    void startLayoutObjects()
+    {
+        [layer startLayoutObjects];
+    }
+
+    // Figure out
+    void makeLayoutObject(int clusterID,const std::vector<LayoutObjectEntry *> &layoutObjects,LayoutObject &retObj)
+    {
+        [layer makeLayoutObject:clusterID layoutObjects:layoutObjects retObj:retObj];
+    }
+
+    // Called right after all the layout objects are generated
+    virtual void endLayoutObjects()
+    {
+        [layer endLayoutObjects];
+    }
+    
+    void paramsForClusterClass(int clusterID,ClusterClassParams &clusterParams)
+    {
+        return [layer clusterID:clusterID params:clusterParams];
+    }
+};
+
 @implementation MaplyBaseInteractionLayer
 {
     pthread_mutex_t changeLock;
@@ -163,9 +203,13 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     pthread_mutex_t workLock;
     pthread_cond_t workWait;
     int numActiveWorkers;
+    ClusterGenMap clusterGens;
+    OurClusterGenerator ourClusterGen;
+    // Last frame (layout frame, not screen frame)
+    std::vector<MaplyTexture *> currentClusterTex,oldClusterTex;
 }
 
-- (id)initWithView:(WhirlyKitView *)inVisualView
+- (instancetype)initWithView:(WhirlyKitView *)inVisualView
 {
     self = [super init];
     if (!self)
@@ -212,6 +256,13 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     
     glSetupInfo = [[WhirlyKitGLSetupInfo alloc] init];
     glSetupInfo->minZres = [visualView calcZbufferRes];
+    
+    LayoutManager *layoutManager =(LayoutManager *)scene->getManager(kWKLayoutManager);
+    if (layoutManager)
+    {
+        ourClusterGen.layer = self;
+        layoutManager->addClusterGenerator(&ourClusterGen);
+    }
 }
 
 - (void)shutdown
@@ -224,10 +275,23 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 
 - (void)lockingShutdown
 {
+    // This shouldn't happen
+    if (isShuttingDown || !layerThread)
+        return;
+    
+    if ([NSThread currentThread] != layerThread)
+    {
+        [self performSelector:@selector(lockingShutdown) onThread:layerThread withObject:nil waitUntilDone:NO];
+        return;
+    }
+    
     pthread_mutex_lock(&workLock);
     isShuttingDown = true;
     while (numActiveWorkers > 0)
         pthread_cond_wait(&workWait, &workLock);
+
+    [self shutdown];
+    
     pthread_mutex_unlock(&workLock);
 }
 
@@ -256,7 +320,7 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 {
     int imageFormat = [desc intForKey:kMaplyTexFormat default:MaplyImageIntRGBA];
     bool wrapX = [desc boolForKey:kMaplyTexWrapX default:false];
-    bool wrapY = [desc boolForKey:kMaplyTexWrapX default:false];
+    bool wrapY = [desc boolForKey:kMaplyTexWrapY default:false];
     int magFilter = [desc enumForKey:kMaplyTexMagFilter values:@[kMaplyMinFilterNearest,kMaplyMinFilterLinear] default:0];
     
     int imgWidth = image.size.width * image.scale;
@@ -313,37 +377,46 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Explicitly add a texture
 - (MaplyTexture *)addTexture:(UIImage *)image desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
 {
-    if ([desc boolForKey:kMaplyTexAtlas default:false])
-        return [self addTextureToAtlas:image desc:desc mode:threadMode];
-    
     pthread_mutex_lock(&imageLock);
     
-    // Look for an existing one
-    MaplyImageTexture maplyImageTex;
-    MaplyImageTextureSet::iterator it = imageTextures.find(MaplyImageTexture(image));
-    if (it != imageTextures.end())
+    // Look for an image texture that's already representing our UIImage
+    MaplyTexture *maplyTex = nil;
+    std::vector<MaplyImageTextureList::iterator> toRemove;
+    for (MaplyImageTextureList::iterator theImageTex = imageTextures.begin();
+         theImageTex != imageTextures.end(); ++theImageTex)
     {
-        // Increment the reference count
-        MaplyImageTexture copyTex(*it);
-        copyTex.refCount++;
-        imageTextures.erase(it);
-        imageTextures.insert(copyTex);
-        
-        maplyImageTex = copyTex;
+        if (*theImageTex)
+        {
+            if ((*theImageTex).image == image)
+            {
+                maplyTex = *theImageTex;
+                break;
+            }
+        } else
+            toRemove.push_back(theImageTex);
+    }
+    for (auto rem : toRemove)
+        imageTextures.erase(rem);
+
+    // Takes the altas path instead
+    if (!maplyTex && [desc boolForKey:kMaplyTexAtlas default:false])
+    {
+        pthread_mutex_unlock(&imageLock);
+        return [self addTextureToAtlas:image desc:desc mode:threadMode];
     }
     
     ChangeSet changes;
-    if (!maplyImageTex.maplyTex)
+    if (!maplyTex)
     {
-        MaplyTexture *maplyTex = [[MaplyTexture alloc] init];
+        maplyTex = [[MaplyTexture alloc] init];
         
         Texture *tex = [self createTexture:image desc:desc mode:threadMode];
         maplyTex.texID = tex->getId();
+        maplyTex.interactLayer = self;
+        maplyTex.image = image;
         
         changes.push_back(new AddTextureReq(tex));
-        maplyImageTex = MaplyImageTexture(image, maplyTex);
-        maplyImageTex.refCount = 1;
-        imageTextures.insert(maplyImageTex);
+        imageTextures.push_back(maplyTex);
     }
     
     pthread_mutex_unlock(&imageLock);
@@ -351,7 +424,7 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     if (!changes.empty())
         [self flushChanges:changes mode:threadMode];
 
-    return maplyImageTex.maplyTex;
+    return maplyTex;
 }
 
 - (MaplyTexture *)addTextureToAtlas:(UIImage *)image desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
@@ -372,8 +445,11 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     if ([atlasGroup addTexture:tex subTex:subTex changes:changes])
     {
         maplyTex = [[MaplyTexture alloc] init];
+        maplyTex.image = image;
         maplyTex.texID = subTex.getId();
         maplyTex.isSubTex = true;
+        maplyTex.interactLayer = self;
+        imageTextures.push_back(maplyTex);
     }
     delete tex;
 
@@ -427,6 +503,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called by the texture dealloc
 - (void)clearTexture:(MaplyTexture *)tex
 {
+    if (!layerThread || isShuttingDown)
+        return;
+    
     ChangeSet changes;
 
     if (tex.isSubTex)
@@ -467,37 +546,28 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 {
     pthread_mutex_lock(&imageLock);
     
+    // Clear up any textures that may have vanished
+    std::vector<MaplyImageTextureList::iterator> toRemove;
+    for (MaplyImageTextureList::iterator it = imageTextures.begin();
+         it != imageTextures.end(); ++it)
+        if (!(*it).image)
+            toRemove.push_back(it);
+    for (auto rem : toRemove)
+        imageTextures.erase(rem);
+    
     // Atlas textures take care of themselves via the MaplyTexture dealloc
     
-    // Look for an existing one
-    MaplyImageTextureSet::iterator it;
-    for (it = imageTextures.begin();it!=imageTextures.end();++it)
-        if (it->maplyTex == tex)
-            break;
-    if (it != imageTextures.end())
-    {
-        // Decrement the reference count
-        if (it->refCount > 1)
+    // If it's associated with the view controller, it exists outside us, so we just let it clean itself up
+    //  when it gets dealloc'ed.
+    // Note: This time is a hack.  Should look at the fade out.
+    if (tex.interactLayer)
+        [self performSelector:@selector(delayedRemoveTexture:) withObject:tex afterDelay:2.0];
+    else {
+        // If we created it in this object, we'll clean it up
+        if (tex.texID != EmptyIdentity)
         {
-            MaplyImageTexture copyTex(*it);
-            imageTextures.erase(*it);
-            copyTex.refCount--;
-            imageTextures.insert(copyTex);
-        } else {
-            // If it's associated with the view controller, it exists outside us, so we just let it clean itself up
-            //  when it gets dealloc'ed.
-            // Note: This time is a hack.  Should look at the fade out.
-            if (it->maplyTex.viewC)
-                [self performSelector:@selector(delayedRemoveTexture:) withObject:it->maplyTex afterDelay:2.0];
-            else {
-                // If we created it in this object, we'll clean it up
-                if (tex.texID != EmptyIdentity)
-                {
-                    changes.push_back(new RemTextureReq(tex.texID));
-                    tex.texID = EmptyIdentity;
-                }
-                imageTextures.erase(it);
-            }
+            changes.push_back(new RemTextureReq(tex.texID));
+            tex.texID = EmptyIdentity;
         }
     }
     
@@ -511,12 +581,16 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     // Holding the object until there delays the deletion
 }
 
+- (void)delayedRemoveTextures:(NSArray *)texs
+{
+    // Holding the objects until there delays the deletion
+}
+
 // We flush out changes in different ways depending on the thread mode
 - (void)flushChanges:(ChangeSet &)changes mode:(MaplyThreadMode)threadMode
 {
     if (changes.empty())
         return;
-
     // This means we beat the layer thread setup, so we'll put this in orbit
     if (!scene)
         threadMode = MaplyThreadAny;
@@ -638,6 +712,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called in an unknown thread
 - (void)addScreenMarkersRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *markers = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     NSMutableDictionary *inDesc = [argArray objectAtIndex:2];
@@ -796,10 +873,145 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     return compObj;
 }
 
+- (void)addClusterGenerator:(NSObject <MaplyClusterGenerator> *)clusterGen
+{
+    @synchronized(self)
+    {
+        clusterGens[clusterGen.clusterNumber] = clusterGen;
+    }
+}
+
+- (void) startLayoutObjects
+{
+    // Started cluster generation, so keep track of the old textures
+    oldClusterTex = currentClusterTex;
+    currentClusterTex.clear();
+    
+    @synchronized(self) {
+        for (ClusterGenMap::iterator it = clusterGens.begin();
+             it != clusterGens.end(); ++it)
+            [it->second startClusterGroup];
+    }
+}
+
+- (void) makeLayoutObject:(int)clusterID layoutObjects:(const std::vector<LayoutObjectEntry *> &)layoutObjects retObj:(LayoutObject &)retObj
+{
+    // Find the right cluster generator
+    NSObject <MaplyClusterGenerator> *clusterGen = nil;
+    @synchronized(self)
+    {
+        clusterGen = clusterGens[clusterID];
+    }
+    
+    if (!clusterGen)
+        return;
+    
+    // Pick a representive screen object
+    int drawPriority = -1;
+    LayoutObject *sampleObj = NULL;
+    for (auto obj : layoutObjects)
+    {
+        if (obj->obj.getDrawPriority() > drawPriority)
+        {
+            drawPriority = obj->obj.getDrawPriority();
+            sampleObj = &obj->obj;
+        }
+    }
+    SimpleIdentity progID = sampleObj->getTypicalProgramID();
+    
+    // Ask for a cluster image
+    MaplyClusterInfo *clusterInfo = [[MaplyClusterInfo alloc] init];
+    clusterInfo.numObjects = layoutObjects.size();
+    MaplyClusterGroup *group = [clusterGen makeClusterGroup:clusterInfo];
+
+    // Geometry for the new cluster object
+    ScreenSpaceObject::ConvexGeometry smGeom;
+    smGeom.progID = progID;
+    smGeom.coords.push_back(Point2d(-group.size.width/2.0,-group.size.height/2.0));
+    smGeom.texCoords.push_back(TexCoord(0,1));
+    smGeom.coords.push_back(Point2d(group.size.width/2.0,-group.size.height/2.0));
+    smGeom.texCoords.push_back(TexCoord(1,1));
+    smGeom.coords.push_back(Point2d(group.size.width/2.0,group.size.height/2.0));
+    smGeom.texCoords.push_back(TexCoord(1,0));
+    smGeom.coords.push_back(Point2d(-group.size.width/2.0,group.size.height/2.0));
+    smGeom.texCoords.push_back(TexCoord(0,0));
+    smGeom.color = RGBAColor(255,255,255,255);
+    
+    retObj.layoutPts = smGeom.coords;
+    retObj.selectPts = smGeom.coords;
+    
+    // Create the texture
+    // Note: Keep this around
+    MaplyTexture *maplyTex = [self addTexture:group.image desc:@{kMaplyTexFormat: @(MaplyImageIntRGBA),
+                                                                 kMaplyTexAtlas: @(true),
+                                                                 kMaplyTexMagFilter: kMaplyMinFilterNearest}
+                                         mode:MaplyThreadCurrent];
+    currentClusterTex.push_back(maplyTex);
+    if (maplyTex.isSubTex)
+    {
+        SubTexture subTex = scene->getSubTexture(maplyTex.texID);
+        subTex.processTexCoords(smGeom.texCoords);
+        smGeom.texIDs.push_back(subTex.texId);
+    } else
+        smGeom.texIDs.push_back(maplyTex.texID);
+
+    retObj.setDrawPriority(drawPriority);
+    retObj.addGeometry(smGeom);
+}
+
+- (void)endLayoutObjects
+{
+    // Layout of new objects is over, so schedule the old textures for removal
+    if (!oldClusterTex.empty())
+    {
+        NSMutableArray *texArr = [NSMutableArray array];
+        for (auto tex : oldClusterTex)
+            [texArr addObject:tex];
+        [self performSelector:@selector(delayedRemoveTextures:) withObject:texArr afterDelay:2.0];
+        oldClusterTex.clear();
+    }
+    
+    @synchronized(self) {
+        for (ClusterGenMap::iterator it = clusterGens.begin();
+             it != clusterGens.end(); ++it)
+            [it->second endClusterGroup];
+    }
+}
+
+- (void) clusterID:(SimpleIdentity)clusterID params:(ClusterGenerator::ClusterClassParams &)params
+{
+    NSObject <MaplyClusterGenerator> *clusterGen = nil;
+    @synchronized(self)
+    {
+        clusterGen = clusterGens[clusterID];
+    }
+
+    // Ask for the shader for moving objects
+    params.motionShaderID = EmptyIdentity;
+    MaplyShader *shader = [clusterGen motionShader];
+    if (shader)
+        params.motionShaderID = shader.program->getId();
+    else {
+        OpenGLES2Program *program = scene->getProgramBySceneName(kToolkitDefaultScreenSpaceMotionProgram);
+        if (program)
+            params.motionShaderID = program->getId();
+    }
+    
+    CGSize size = clusterGen.clusterLayoutSize;
+    params.clusterSize = Point2d(size.width,size.height);
+    
+    params.selectable = clusterGen.selectable;
+    
+    params.markerAnimationTime = clusterGen.markerAnimationTime;
+}
+
 // Actually add the markers.
 // Called in an unknown thread.
 - (void)addMarkersRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *markers = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     NSMutableDictionary *inDesc = [argArray objectAtIndex:2];
@@ -954,6 +1166,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called in an unknown thread.
 - (void)addScreenLabelsRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *labels = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     NSMutableDictionary *inDesc = [argArray objectAtIndex:2];
@@ -1089,6 +1304,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called in an unknown thread.
 - (void)addLabelsRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *labels = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     NSMutableDictionary *inDesc = [argArray objectAtIndex:2];
@@ -1208,6 +1426,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called in an unknown thread
 - (void)addVectorsRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *vectors = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     NSMutableDictionary *inDesc = [argArray objectAtIndex:2];
@@ -1217,7 +1438,7 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
     [self applyDefaultName:kMaplyDrawPriority value:@(kMaplyVectorDrawPriorityDefault) toDict:inDesc];
     
     // Might be a custom shader on these
-    NSString *shaderName = kMaplyDefaultTriangleShader;
+    NSString *shaderName = (![inDesc[kMaplyFilled] boolValue]) ? kMaplyShaderDefaultLine : kMaplyDefaultTriangleShader;
     if ([inDesc[kMaplyVecTextureProjection] isEqualToString:kMaplyProjectionScreen])
         shaderName = kMaplyShaderDefaultTriScreenTex;
     [self resolveShader:inDesc defaultShader:shaderName];
@@ -1336,6 +1557,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called in an unknown thread
 - (void)addWideVectorsRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *vectors = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     NSMutableDictionary *inDesc = [argArray objectAtIndex:2];
@@ -1359,9 +1583,10 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
             tex = [self addImage:theImage imageFormat:MaplyImage4Layer8Bit mode:threadMode];
         else if ([theImage isKindOfClass:[MaplyTexture class]])
             tex = (MaplyTexture *)theImage;
-        if (tex.texID)
+        if (tex.texID) {
             inDesc[kMaplyVecTexture] = @(tex.texID);
-        else
+            compObj.textures.insert(tex);
+        } else
             [inDesc removeObjectForKey:kMaplyVecTexture];
     }
     
@@ -1425,6 +1650,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called in an unknown thread
 - (void)instanceVectorsRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     MaplyComponentObject *baseObj = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     compObj.vectors = baseObj.vectors;
@@ -1531,6 +1759,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Actually do the vector change
 - (void)changeVectorRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     MaplyComponentObject *vecObj = [argArray objectAtIndex:0];
     NSDictionary *desc = [argArray objectAtIndex:1];
     MaplyThreadMode threadMode = (MaplyThreadMode)[[argArray objectAtIndex:2] intValue];
@@ -1587,6 +1818,9 @@ typedef std::set<ThreadChanges> ThreadChangeSet;
 // Called in the layer thread
 - (void)addShapesRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     CoordSystemDisplayAdapter *coordAdapter = scene->getCoordAdapter();
     NSArray *shapes = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
@@ -1977,6 +2211,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 // Called in the layer thread
 - (void)addGeometryRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *geom = argArray[0];
     MaplyComponentObject *compObj = argArray[1];
     NSMutableDictionary *inDesc = argArray[2];
@@ -2078,6 +2315,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 // Called in the layer thread
 - (void)addStickersRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *stickers = argArray[0];
     MaplyComponentObject *compObj = argArray[1];
     NSMutableDictionary *inDesc = argArray[2];
@@ -2196,6 +2436,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 // Actually do the sticker change
 - (void)changeStickerRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     MaplyComponentObject *stickerObj = [argArray objectAtIndex:0];
     NSDictionary *desc = [argArray objectAtIndex:1];
     MaplyThreadMode threadMode = (MaplyThreadMode)[[argArray objectAtIndex:2] intValue];
@@ -2284,6 +2527,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 // Actually add the lofted polys.
 - (void)addLoftedPolysRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *vectors = [argArray objectAtIndex:0];
     MaplyComponentObject *compObj = [argArray objectAtIndex:1];
     compObj.vectors = vectors;
@@ -2357,6 +2603,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 // Actually add the billboards.
 - (void)addBillboardsRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *bills = argArray[0];
     MaplyComponentObject *compObj = argArray[1];
     NSMutableDictionary *inDesc = argArray[2];
@@ -2525,6 +2774,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 
 - (void)addParticleSystemRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     MaplyParticleSystem *partSys = argArray[0];
     MaplyComponentObject *compObj = argArray[1];
     NSMutableDictionary *inDesc = argArray[2];
@@ -2650,6 +2902,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 
 - (void)addParticleSystemBatchRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     MaplyParticleBatch *batch = argArray[0];
     MaplyThreadMode threadMode = (MaplyThreadMode)[[argArray objectAtIndex:1] intValue];
     
@@ -2711,9 +2966,78 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
     }
 }
 
+- (void)addPointsRun:(NSArray *)argArray
+{
+    NSArray *pointsArray = argArray[0];
+    MaplyComponentObject *compObj = argArray[1];
+    NSMutableDictionary *inDesc = argArray[2];
+    MaplyThreadMode threadMode = (MaplyThreadMode)[[argArray objectAtIndex:3] intValue];
+
+    [self applyDefaultName:kMaplyDrawPriority value:@(kMaplyParticleSystemDrawPriorityDefault) toDict:inDesc];
+    [self applyDefaultName:kMaplyPointSize value:@(kMaplyPointSizeDefault) toDict:inDesc];
+    
+    // Might be a custom shader on these
+    [self resolveShader:inDesc defaultShader:kMaplyShaderParticleSystemPointDefault];
+
+    compObj.isSelectable = false;
+
+    // May need a temporary context
+    EAGLContext *tmpContext = [self setupTempContext:threadMode];
+
+    GeometryManager *geomManager = (GeometryManager *)scene->getManager(kWKGeometryManager);
+    
+    ChangeSet changes;
+    if (geomManager)
+    {
+        for (MaplyPoints *points : pointsArray)
+        {
+            Matrix4d mat = Matrix4d::Identity();
+            if (points.transform)
+            {
+                mat = points.transform.mat;
+            }
+            SimpleIdentity geomID = geomManager->addGeometryPoints(points->points, mat, inDesc, changes);
+            if (geomID != EmptyIdentity)
+                compObj.geomIDs.insert(geomID);
+        }
+    }
+    
+    [self flushChanges:changes mode:threadMode];
+    
+    @synchronized(userObjects)
+    {
+        [userObjects addObject:compObj];
+        compObj.underConstruction = false;
+    }
+    
+    [self clearTempContext:tmpContext];
+}
+
+- (MaplyComponentObject *)addPoints:(NSArray *)points desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
+{
+    MaplyComponentObject *compObj = [[MaplyComponentObject alloc] initWithDesc:desc];
+    compObj.underConstruction = true;
+    
+    NSArray *argArray = @[points, compObj, [NSMutableDictionary dictionaryWithDictionary:desc], @(threadMode)];
+    switch (threadMode)
+    {
+        case MaplyThreadCurrent:
+            [self addPointsRun:argArray];
+            break;
+        case MaplyThreadAny:
+            [self performSelector:@selector(addPointsRun:) onThread:layerThread withObject:argArray waitUntilDone:NO];
+            break;
+    }
+    
+    return compObj;
+}
+
 // Remove the object, but do it on the layer thread
 - (void)removeObjectRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+    
     NSArray *inUserObjs = argArray[0];
     MaplyThreadMode threadMode = (MaplyThreadMode)[[argArray objectAtIndex:1] intValue];
     
@@ -2842,6 +3166,9 @@ typedef std::set<GeomModelInstances *,struct GeomModelInstancesCmp> GeomModelIns
 
 - (void)enableObjectsRun:(NSArray *)argArray
 {
+    if (isShuttingDown || !layerThread)
+        return;
+
     NSArray *theObjs = argArray[0];
     bool enable = [argArray[1] boolValue];
     MaplyThreadMode threadMode = (MaplyThreadMode)[[argArray objectAtIndex:2] intValue];

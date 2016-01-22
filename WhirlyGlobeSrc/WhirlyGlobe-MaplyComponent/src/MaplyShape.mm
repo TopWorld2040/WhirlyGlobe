@@ -103,7 +103,7 @@ using namespace WhirlyKit;
 
 @implementation MaplyShapeGreatCircle
 
-- (id)init
+- (instancetype)init
 {
     self = [super init];
     if (!self)
@@ -125,7 +125,10 @@ using namespace WhirlyKit;
 
     // Note: Atan2 is the correct way, but it's not working right here
 //    return atan2f(dot, mag);
-    return acosf(dot);
+    float ret = acosf(dot);
+    if (std::isnan(ret))
+        ret = 0.f;
+    return ret;
 }
 
 @end
@@ -138,7 +141,7 @@ using namespace WhirlyKit;
     MaplyCoordinate3d *coords;    
 }
 
-- (id)initWithCoords:(MaplyCoordinate3d *)inCoords numCoords:(int)inNumCoords
+- (instancetype)initWithCoords:(MaplyCoordinate3d *)inCoords numCoords:(int)inNumCoords
 {
     self = [super init];
     if (!self)
@@ -173,7 +176,22 @@ using namespace WhirlyKit;
     NSData *coords;
 }
 
-- (id)initWithOutline:(double *)inCoords numCoordPairs:(int)numCoordPairs
+- (instancetype)initWithOutline:(NSArray *)inCoords
+{
+	double* doubleCoords = (double *)malloc(sizeof(double)*[inCoords count]*2);
+
+	for (int i = 0; i < [inCoords count]; ++i) {
+		doubleCoords[i] = [inCoords[i] doubleValue];
+	}
+
+	self = [self initWithOutline:doubleCoords numCoordPairs:[inCoords count]];
+
+	free(doubleCoords);
+
+	return self;
+}
+
+- (instancetype)initWithOutline:(double *)inCoords numCoordPairs:(int)numCoordPairs
 {
     self = [super init];
     

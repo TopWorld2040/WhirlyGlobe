@@ -31,6 +31,7 @@
 #import "MaplyShader_private.h"
 #import "MaplyActiveObject_private.h"
 #import "MaplyCoordinateSystem_private.h"
+#import "MaplyCluster.h"
 #import "SMCalloutView.h"
 #import "Maply3dTouchPreviewDelegate.h"
 
@@ -77,6 +78,9 @@
     
     /// Active models
     NSMutableArray *activeObjects;
+    
+    /// The default cluster generator (group 0)
+    MaplyBasicClusterGenerator *defaultClusterGenerator;
     
     /// Current draw priority if we're assigning them ourselves
     int layerDrawPriority;

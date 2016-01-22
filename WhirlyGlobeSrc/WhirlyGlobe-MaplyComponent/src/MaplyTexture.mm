@@ -25,7 +25,7 @@ using namespace WhirlyKit;
 
 @implementation MaplyTexture
 
-- (id)init
+- (instancetype)init
 {
     self = [super init];
     if (!self)
@@ -39,19 +39,10 @@ using namespace WhirlyKit;
 
 - (void)clear
 {
-    if (_viewC && _viewC->scene && _texID != EmptyIdentity)
+    if (_texID != EmptyIdentity)
     {
-        if (_viewC->interactLayer)
-            [_viewC->interactLayer clearTexture:self];
-        else {
-            if (!_isSubTex)
-            {
-                if (_viewC->scene)
-                    _viewC->scene->addChangeRequest(new RemTextureReq(_texID));
-                _viewC = nil;
-                _texID = EmptyIdentity;
-            }
-        }
+        if (_interactLayer)
+            [_interactLayer clearTexture:self];
     }
 }
 

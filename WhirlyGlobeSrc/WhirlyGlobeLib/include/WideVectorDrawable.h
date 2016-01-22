@@ -28,6 +28,9 @@ namespace WhirlyKit
     
 /// Construct and return the Billboard shader program
 OpenGLES2Program *BuildWideVectorProgram();
+    
+// Used to debug the wide vectors
+//#define WIDEVECDEBUG 1
 
 /** This drawable adds convenience functions for wide vectors.
   */
@@ -36,20 +39,47 @@ class WideVectorDrawable : public BasicDrawable
 public:
     WideVectorDrawable();
     
-    /// Each vertex has an offset in 3-space
-    void addDir(const Point3f &dir);
-    void addDir(const Point3d &dir);
-
+    virtual unsigned int addPoint(const Point3f &pt);
+    // Next point, for calculating p1 - p0
+    void add_p1(const Point3f &vec);
+    // Texture calculation parameters
+    void add_texInfo(float texX,float texYmin,float texYmax,float texOffset);
+    // Vector for 90 deg from line
+    void add_n0(const Point3f &vec);
+    // Complex constant we multiply by width for t
+    void add_c0(float c);
+    
     /// How often the texture repeats
     void setTexRepeat(float inTexRepeat) { texRepeat = inTexRepeat; }
+    
+    /// Number of pixels to interpolate at the edges
+    void setEdgeSize(float inEdgeSize) { edgeSize = inEdgeSize; }
+    /// Fix the width to a real world value, rather than letting it change
+    
+    void setRealWorldWidth(double width) { realWidthSet = true;  realWidth = width; }
     
     /// We override draw so we can set our own values
     virtual void draw(WhirlyKitRendererFrameInfo *frameInfo,Scene *scene);
     
 protected:
+    bool realWidthSet;
+    double realWidth;
     bool snapTex;
     float texRepeat;
-    int offsetIndex;
+    float edgeSize;
+    int p1_index;
+    int n0_index;
+    int c0_index;
+    int tex_index;
+    
+#ifdef WIDEVECDEBUG
+    // Note: Debugging
+    std::vector<Point3f> locPts;
+    std::vector<Point3f> p1;
+    std::vector<Point2f> t0_limits;
+    std::vector<Point3f> n0;
+    std::vector<float> c0;
+#endif
 };
     
 }

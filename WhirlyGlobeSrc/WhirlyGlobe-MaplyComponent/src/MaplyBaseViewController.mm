@@ -57,11 +57,14 @@ using namespace WhirlyKit;
     if (!scene)
         return;
     
+    defaultClusterGenerator = nil;
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(periodicPerfOutput) object:nil];
 
     [glView stopAnimation];
+    [glView shutdown];
     
     EAGLContext *oldContext = [EAGLContext currentContext];
     [sceneRenderer useContext];
@@ -236,6 +239,10 @@ using namespace WhirlyKit;
 	// Kick off the layer thread
 	// This will start loading things
 	[baseLayerThread start];
+    
+    // Default cluster generator
+    defaultClusterGenerator = [[MaplyBasicClusterGenerator alloc] initWithColors:@[[UIColor orangeColor]] clusterNumber:0 size:CGSizeMake(32,32) viewC:self];
+    [self addClusterGenerator:defaultClusterGenerator];
     
     // Set up defaults for the hints
     NSDictionary *newHints = [NSDictionary dictionary];
@@ -565,6 +572,12 @@ static const float PerfOutputDelay = 15.0;
     return [self addScreenMarkers:markers desc:desc mode:MaplyThreadAny];
 }
 
+- (void)addClusterGenerator:(NSObject <MaplyClusterGenerator> *)clusterGen
+{
+    [interactLayer addClusterGenerator:clusterGen];
+}
+
+
 - (MaplyComponentObject *)addMarkers:(NSArray *)markers desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
 {
     if (![interactLayer startOfWork])
@@ -810,6 +823,17 @@ static const float PerfOutputDelay = 15.0;
     return [self addLoftedPolys:polys key:key cache:cacheDb desc:desc mode:MaplyThreadAny];
 }
 
+- (MaplyComponentObject *)addPoints:(NSArray *)points desc:(NSDictionary *)desc mode:(MaplyThreadMode)threadMode
+{
+    if (![interactLayer startOfWork])
+        return nil;
+
+    MaplyComponentObject *compObj = [interactLayer addPoints:points desc:desc mode:threadMode];
+    [interactLayer endOfWork];
+    
+    return compObj;
+}
+
 /// Add a view to track to a particular location
 - (void)addViewTracker:(WGViewTracker *)viewTrack
 {
@@ -992,7 +1016,6 @@ static const float PerfOutputDelay = 15.0;
         return nil;
     
     MaplyTexture *maplyTex = [interactLayer addTexture:image desc:desc mode:threadMode];
-    maplyTex.viewC = self;
     
     [interactLayer endOfWork];
     
@@ -1022,8 +1045,6 @@ static const float PerfOutputDelay = 15.0;
 - (MaplyTexture *)addTextureToAtlas:(UIImage *)image mode:(MaplyThreadMode)threadMode
 {
     MaplyTexture *maplyTex = [self addTextureToAtlas:image imageFormat:MaplyImageIntRGBA wrapFlags:0 mode:threadMode];
-    if (maplyTex)
-        maplyTex.viewC = self;
     
     return maplyTex;
 }
@@ -1362,6 +1383,10 @@ static const float PerfOutputDelay = 15.0;
         [self unregisterForPreviewingWithContext:previewingContext];
         previewingContext = nil;
     }
+}
+
+- (void)requirePanGestureRecognizerToFailForGesture:(UIGestureRecognizer *__nullable)other {
+    // Implement in derived class.
 }
 
 @end
