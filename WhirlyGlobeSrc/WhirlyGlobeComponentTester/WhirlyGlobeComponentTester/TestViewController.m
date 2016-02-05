@@ -2291,7 +2291,7 @@ static const float MarkerSpread = 2.0;
 {
     imageWaitLoad = [configViewC valueForSection:kMaplyTestCategoryInternal row:kMaplyTestWaitLoad];
     
-    [self setupBaseLayer:((ConfigSection *)configViewC.values[0]).rows];
+  [self setupBaseLayer:self.baseLayerSettingsOverride?:((ConfigSection *)configViewC.values[0]).rows];
     if ([configViewC.values count] > 1)
         [self setupOverlays:((ConfigSection *)configViewC.values[1]).rows];
     
