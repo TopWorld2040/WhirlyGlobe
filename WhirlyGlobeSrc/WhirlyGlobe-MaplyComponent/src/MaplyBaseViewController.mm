@@ -103,6 +103,7 @@ using namespace WhirlyKit;
     
     activeObjects = nil;
     
+    interactLayer->scene = nil;
     interactLayer = nil;
     
     while ([userLayers count] > 0)

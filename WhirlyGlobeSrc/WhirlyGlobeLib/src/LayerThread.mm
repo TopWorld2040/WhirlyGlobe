@@ -93,6 +93,7 @@ using namespace WhirlyKit;
 {
     pthread_mutex_destroy(&changeLock);
     pthread_mutex_destroy(&existenceLock);
+    _scene = nil;
     // Note: It's not clear why we'd do this here.
     //       What run loop would it be referring to?
 //    [NSObject cancelPreviousPerformRequestsWithTarget:self];    
