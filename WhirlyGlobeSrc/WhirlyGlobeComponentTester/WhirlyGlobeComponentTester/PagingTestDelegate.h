@@ -25,5 +25,7 @@
 @interface PagingTestDelegate : NSObject<MaplyPagingDelegate>
 
 @property (nonatomic,strong) MaplyCoordinateSystem *coordSys;
+@property (nonatomic, assign) int numMarkers;
+@property (nonatomic, assign) float maxDelay;
 
 @end

@@ -440,6 +440,7 @@
 		2BFD27EA170B933C00127EF5 /* ZMB.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 2BFD26F1170B933C00127EF5 /* ZMB.geojson */; };
 		2BFD27EB170B933C00127EF5 /* ZWE.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 2BFD26F2170B933C00127EF5 /* ZWE.geojson */; };
 		2BFF026217A9BA2D00007842 /* AnimationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2BFF026117A9BA2D00007842 /* AnimationTest.m */; };
+		88A60A281C65110400A375E8 /* SImpleTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 88A60A271C65110400A375E8 /* SImpleTestViewController.m */; };
 		88C970C91C4561B0000E8FCE /* uturn2.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 88C970C81C4561B0000E8FCE /* uturn2.geojson */; };
 /* End PBXBuildFile section */
 
@@ -922,6 +923,8 @@
 		2BFD26F2170B933C00127EF5 /* ZWE.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ZWE.geojson; sourceTree = "<group>"; };
 		2BFF026017A9BA2C00007842 /* AnimationTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimationTest.h; sourceTree = "<group>"; };
 		2BFF026117A9BA2D00007842 /* AnimationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnimationTest.m; sourceTree = "<group>"; };
+		88A60A261C65110400A375E8 /* SImpleTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SImpleTestViewController.h; sourceTree = "<group>"; };
+		88A60A271C65110400A375E8 /* SImpleTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SImpleTestViewController.m; sourceTree = "<group>"; };
 		88C970C81C4561B0000E8FCE /* uturn2.geojson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = uturn2.geojson; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1026,6 +1029,8 @@
 				2BC989A717DA66BB0071DA9E /* WeatherShader.m */,
 				2B62DD8416E7F3A2001F52FC /* TestViewController.h */,
 				2B62DD8516E7F3A2001F52FC /* TestViewController.m */,
+				88A60A261C65110400A375E8 /* SImpleTestViewController.h */,
+				88A60A271C65110400A375E8 /* SImpleTestViewController.m */,
 				2B62DD6416E7F0BC001F52FC /* Supporting Files */,
 				2BFD25D8170B929E00127EF5 /* resources */,
 			);
@@ -2063,6 +2068,7 @@
 			files = (
 				2B62DD6A16E7F0BC001F52FC /* main.m in Sources */,
 				2B162DD21BD8068B0001E17B /* ParticleTest.m in Sources */,
+				88A60A281C65110400A375E8 /* SImpleTestViewController.m in Sources */,
 				2B62DD8616E7F3A2001F52FC /* AppDelegate.m in Sources */,
 				2B62DD8716E7F3A2001F52FC /* ConfigViewController.m in Sources */,
 				2B62DD8A16E7F3A2001F52FC /* StartupViewController.m in Sources */,

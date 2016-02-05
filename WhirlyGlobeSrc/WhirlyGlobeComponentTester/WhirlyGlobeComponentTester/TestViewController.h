@@ -40,6 +40,7 @@ typedef enum {MaplyGlobe,MaplyGlobeWithElevation,Maply3DMap,Maply2DMap,Maply2DBN
 }
 
 @property (nonatomic, strong) NSDictionary *baseLayerSettingsOverride;
+@property (nonatomic, strong) NSDictionary *overlLayerSettingsOverride;
 
 // Fire it up with a particular base layer and map or globe display
 - (id)initWithMapType:(MapType)mapType;

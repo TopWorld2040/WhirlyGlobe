@@ -31,7 +31,9 @@
     self = [super init];
     image = [UIImage imageNamed:@"map_pin"];
     _coordSys = [[MaplySphericalMercator alloc] initWebStandard];
-    
+    self.maxDelay = 1.0;
+    self.numMarkers = 200;
+  
     return self;
 }
 
@@ -45,9 +47,6 @@
     return 22;
 }
 
-static int NumMarkers = 200;
-static const float MaxDelay = 1.0;
-
 - (void)startFetchForTile:(MaplyTileID)tileID forLayer:(MaplyQuadPagingLayer *)layer
 {
     MaplyBoundingBox bbox;
@@ -56,21 +55,23 @@ static const float MaxDelay = 1.0;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                    ^{
                        // Random delay
-                       usleep(drand48()* MaxDelay * 1e6);
+                       usleep(drand48()* self.maxDelay * 1e6);
                        
                        NSMutableArray *markers = [NSMutableArray array];
-                       for (unsigned int ii=0;ii<NumMarkers;ii++)
+                       for (unsigned int ii=0;ii<self.numMarkers;ii++)
                        {
                            MaplyScreenMarker *marker = [[MaplyScreenMarker alloc] init];
                            marker.layoutImportance = MAXFLOAT;
-                           marker.image = image;
+                           marker.image = [UIImage imageNamed:@"map_pin"];
                            marker.size = CGSizeMake(32.0, 32.0);
                            marker.loc = MaplyCoordinateMake((bbox.ur.x-bbox.ll.x)*drand48()+bbox.ll.x, (bbox.ur.y-bbox.ll.y)*drand48()+bbox.ll.y);
                            [markers addObject:marker];
                        }
 
                        MaplyComponentObject *compObj = [layer.viewC addScreenMarkers:markers desc:@{kMaplyEnable: @(NO)} mode:MaplyThreadCurrent];
-                       [layer addData:@[compObj] forTile:tileID];
+                       if(compObj) {
+                           [layer addData:@[compObj] forTile:tileID];
+                       }
                        [layer tileDidLoad:tileID];
                    });
 }

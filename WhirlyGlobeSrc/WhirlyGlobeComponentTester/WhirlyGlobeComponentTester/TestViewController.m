@@ -444,7 +444,7 @@ static const int BaseEarthPriority = kMaplyImageLayerDrawPriorityDefault;
 
 //    [self wideLineTest];
   
-    [baseViewC enable3dTouchSelection:self];
+//    [baseViewC enable3dTouchSelection:self];
 
     if (startupMapType == MaplyGlobeScrollView || startupMapType == Maply2DScrollView) {
         for (NSNumber *dirNum in @[@(UISwipeGestureRecognizerDirectionLeft), @(UISwipeGestureRecognizerDirectionRight)]) {
@@ -554,13 +554,13 @@ static const int BaseEarthPriority = kMaplyImageLayerDrawPriorityDefault;
     marker1.image = [UIImage imageNamed:@"map_pin"];
     marker1.loc = MaplyCoordinateMakeWithDegrees(12.454041, 55.643532);
     marker1.size = CGSizeMake(40, 40);
-    [baseViewC addScreenMarkers:@[marker1] desc:@{kMaplyClusterGroup: @(0)} mode:MaplyThreadAny];
+    [baseViewC addScreenMarkers:@[marker1] desc:@{kMaplyClusterGroup: @(0)} mode:MaplyThreadCurrent];
 
     MaplyScreenMarker *marker2 = [[MaplyScreenMarker alloc] init];
     marker2.image = [UIImage imageNamed:@"map_pin"];
     marker2.loc = MaplyCoordinateMakeWithDegrees(12.485252, 55.723499);
     marker2.size = CGSizeMake(40, 40);
-    [baseViewC addScreenMarkers:@[marker2] desc:@{kMaplyClusterGroup: @(0)} mode:MaplyThreadAny];
+    [baseViewC addScreenMarkers:@[marker2] desc:@{kMaplyClusterGroup: @(0)} mode:MaplyThreadCurrent];
 }
 
 - (void)labelMarkerTest:(NSNumber *)time
@@ -2293,8 +2293,14 @@ static const float MarkerSpread = 2.0;
     
   [self setupBaseLayer:self.baseLayerSettingsOverride?:((ConfigSection *)configViewC.values[0]).rows];
     if ([configViewC.values count] > 1)
-        [self setupOverlays:((ConfigSection *)configViewC.values[1]).rows];
-    
+      [self setupOverlays:self.overlLayerSettingsOverride?:((ConfigSection *)configViewC.values[1]).rows];
+  
+  
+  PagingTestDelegate *pager = [[PagingTestDelegate alloc] init];
+  MaplyQuadPagingLayer *layer = [[MaplyQuadPagingLayer alloc] initWithCoordSystem:pager.coordSys delegate:pager];
+  [baseViewC addLayer:layer];
+
+  
     if ([configViewC valueForSection:kMaplyTestCategoryObjects row:kMaplyTestLabel2D])
     {
         if (!screenLabelsObj)

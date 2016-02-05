@@ -20,6 +20,7 @@
 
 #import "StartupViewController.h"
 #import "ConfigViewController.h"
+#import "SImpleTestViewController.h"
 
 @interface StartupViewController ()
 
@@ -186,10 +187,13 @@
     }
     NSLog(@"showing test view controller with base map type:%@", baseLayer);
     
-    TestViewController *viewController = [[TestViewController alloc] initWithMapType:mapType];
-    viewController.baseLayerSettingsOverride = @{
-                                                 baseLayer: @YES
-                                                 };
+//    TestViewController *viewController = [[TestViewController alloc] initWithMapType:mapType];
+//    viewController.baseLayerSettingsOverride = @{
+//                                                 baseLayer: @YES
+//                                                 };
+//    viewController.overlLayerSettingsOverride = @{};
+
+    SImpleTestViewController *viewController = [[SImpleTestViewController alloc] init];
     [self presentViewController:viewController
                        animated:YES
                      completion:
