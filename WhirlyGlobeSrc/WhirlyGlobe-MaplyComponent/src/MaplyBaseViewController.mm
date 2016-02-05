@@ -315,6 +315,7 @@ using namespace WhirlyKit;
         if (wasAnimating)
             [self stopAnimation];
     }
+    [glView pause];
     for(WhirlyKitLayerThread *t in layerThreads)
     {
         [t pause];
@@ -327,6 +328,7 @@ using namespace WhirlyKit;
     {
         [t unpause];
     }
+    [glView unpause];
     if (wasAnimating)
     {
         [self startAnimation];
@@ -336,8 +338,9 @@ using namespace WhirlyKit;
 
 - (void)viewWillAppear:(BOOL)animated
 {
-	[self startAnimation];
-	
+    [glView unpause];
+  [self startAnimation];
+
 	[super viewWillAppear:animated];
 }
 
@@ -346,6 +349,7 @@ using namespace WhirlyKit;
 	[super viewWillDisappear:animated];
 
 	[self stopAnimation];
+    [glView pause];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
