@@ -66,12 +66,15 @@ static double MAX_EXTENT = 20037508.342789244;
 - (MaplyVectorTileData *)buildObjects:(NSData *)tileData tile:(MaplyTileID)tileID bounds:(MaplyBoundingBox)bbox
 {
     //calulate tile bounds and coordinate shift
+    MaplyBoundingBox mercBbbox;
+    mercBbbox.ll = [self toMerc:bbox.ll];
+    mercBbbox.ur = [self toMerc:bbox.ur];
     int tileSize = 256;
-    double sx = tileSize / (bbox.ur.x - bbox.ll.x);
-    double sy = tileSize / (bbox.ur.y - bbox.ll.y);
+    double sx = tileSize / (mercBbbox.ur.x - mercBbbox.ll.x);
+    double sy = tileSize / (mercBbbox.ur.y - mercBbbox.ll.y);
     //Tile origin is upper left corner, in epsg:3785
-    double tileOriginX = bbox.ll.x;
-    double tileOriginY = bbox.ur.y;
+    double tileOriginX = mercBbbox.ll.x;
+    double tileOriginY = mercBbbox.ur.y;
     
     double scale;
     double x;
@@ -320,16 +323,18 @@ static double MAX_EXTENT = 20037508.342789244;
                 }
               
                 if(vecObj.shapes.size() > 0) {
+                    MaplyVectorObject *clipped = [vecObj clipToMbr:bbox.ll
+                                                        upperRight:bbox.ur];
+                    clipped.attributes = attributes;
                     for(NSObject<MaplyVectorStyle> *style in styles) {
                         NSMutableArray *featuresForStyle = featureStyles[style.uuid];
                         if(!featuresForStyle) {
                             featuresForStyle = [NSMutableArray new];
                             featureStyles[style.uuid] = featuresForStyle;
                         }
-                        [featuresForStyle addObject:vecObj];
+                        [featuresForStyle addObject:clipped];
                     }
                 }
-                vecObj.attributes = attributes;
             } //end of iterating features
         }//end of itterating layers
     } else {
@@ -384,6 +389,19 @@ static double MAX_EXTENT = 20037508.342789244;
     tileRet.compObjs = components;
     
     return tileRet;
+}
+
+/**
+ Convert a coordinate from lat/lon radians to epsg:3785
+ Verified output with "cs2cs +init=epsg:4326 +to +init=epsg:3785", correct within .5 meters,
+ but frequently off by .4
+ */
+- (MaplyCoordinate)toMerc:(MaplyCoordinate)coord {
+    //  MaplyCoordinate orig = coord;
+    coord.x = RadToDeg(coord.x) * MAX_EXTENT / 180;
+    coord.y = 3189068.5 * log((1.0 + sin(coord.y)) / (1.0 - sin(coord.y)));
+    //  NSLog(@"%f %f -> %.2f %.2f", RadToDeg(orig.x), RadToDeg(orig.y), coord.x, coord.y);
+    return coord;
 }
 
 @end
@@ -588,8 +606,6 @@ static double MAX_EXTENT = 20037508.342789244;
     ^{
         MaplyBoundingBox bbox;
         [layer geoBoundsforTile:tileID ll:&bbox.ll ur:&bbox.ur];
-        bbox.ll = [self toMerc:bbox.ll];
-        bbox.ur = [self toMerc:bbox.ur];
         
         NSMutableArray *compObjs = [NSMutableArray array];
         
@@ -674,20 +690,5 @@ static double MAX_EXTENT = 20037508.342789244;
     return 14;
   }
 }
-
-
-/**
- Convert a coordinate from lat/lon radians to epsg:3785
- Verified output with "cs2cs +init=epsg:4326 +to +init=epsg:3785", correct within .5 meters, 
- but frequently off by .4
- */
-- (MaplyCoordinate)toMerc:(MaplyCoordinate)coord {
-//  MaplyCoordinate orig = coord;
-  coord.x = RadToDeg(coord.x) * MAX_EXTENT / 180;
-  coord.y = 3189068.5 * log((1.0 + sin(coord.y)) / (1.0 - sin(coord.y)));
-//  NSLog(@"%f %f -> %.2f %.2f", RadToDeg(orig.x), RadToDeg(orig.y), coord.x, coord.y);
-  return coord;
-}
-
 
 @end
