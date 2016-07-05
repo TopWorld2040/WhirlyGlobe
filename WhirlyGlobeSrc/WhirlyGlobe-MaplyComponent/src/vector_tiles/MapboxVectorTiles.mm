@@ -362,6 +362,7 @@ static double MAX_EXTENT = 20037508.342789244;
             
             MaplyComponentObject *c = [_viewC addScreenLabels:@[label]
                                                               desc:@{kMaplyFont : [UIFont boldSystemFontOfSize:12],
+                                                                     kMaplyEnable: @NO,
                                                                      kMaplyTextColor : [UIColor blackColor]}];
             [components addObject:c];
         }
@@ -379,7 +380,8 @@ static double MAX_EXTENT = 20037508.342789244;
                                                                                attributes:nil];
             MaplyComponentObject *c = [_viewC addVectors:@[outlineObj]
                                                          desc:@{kMaplyColor: [UIColor redColor],
-                                                                kMaplyVecWidth:@(1)
+                                                                kMaplyVecWidth:@(1),
+                                                                kMaplyDrawPriority:@999999999
                                                                 }];
             [components addObject:c];
         }
