@@ -1774,7 +1774,7 @@ static const float MarkerSpread = 2.0;
                                               apiKey:@"vector-tiles-05s8a-0"
                                               sourceType:MapzenSourcePBF
                                               styleData:styleData
-                                              styleType:MapnikMapboxGLStyle
+                                              styleType:MapnikXMLStyle
                                               viewC:baseViewC];
                     mzSource.minZoom = 0;
                     mzSource.maxZoom = 24;

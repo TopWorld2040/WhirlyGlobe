@@ -47,21 +47,6 @@
                     styleSet = mapnikStyleSet;
                 }
                     break;
-                case MapnikMapboxGLStyle:
-                {
-                    MaplyMapboxVectorStyleSet *mapboxStyleSet = [[MaplyMapboxVectorStyleSet alloc] initWithJSON:styleData viewC:viewC];
-                    styleSet = mapboxStyleSet;
-                    
-                    for (MapboxVectorLayerBackground *backLayer in mapboxStyleSet.layers)
-                    {
-                        if ([backLayer isKindOfClass:[MapboxVectorLayerBackground class]])
-                        {
-                            _backgroundColor = [UIColor grayColor];
-//                            _backgroundColor = [backLayer.paint.color maxColorWithStyleSet:mapboxStyleSet];
-                        }
-                    }
-                }
-                    break;
             }
                         
             // Create a tile parser for later
